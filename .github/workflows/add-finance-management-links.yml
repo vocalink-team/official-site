@@ -1,0 +1,49 @@
+name: Add finance and management links
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add operations links and update version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin.html')
+          s=p.read_text(encoding='utf-8')
+          old='<a class="ops-link" href="sales.html"><strong>営業管理システム →</strong><span>顧客・営業案件・営業活動・パイプラインを管理</span></a><a class="ops-link" href="projects.html"><strong>案件管理システム →</strong><span>制作案件・タスク・進捗・納期を管理</span></a>'
+          new=old+'<a class="ops-link" href="finance.html"><strong>経理・収支システム →</strong><span>収入・支出・未決済・取引を管理</span></a><a class="ops-link" href="management.html"><strong>経営ダッシュボード →</strong><span>売上・利益・営業・案件の経営状況を確認</span></a>'
+          if 'href="finance.html"' not in s:
+              if old not in s: raise SystemExit('operations link anchor not found')
+              s=s.replace(old,new,1)
+              p.write_text(s,encoding='utf-8')
+          import json
+          v=Path('VERSION.json')
+          d=json.loads(v.read_text(encoding='utf-8'))
+          d['version']='v1.2.0'
+          d['updated']='2026-09-08'
+          changes=d.setdefault('changes',[])
+          additions=['経理・収支システム（finance.html）を追加','経営ダッシュボード（management.html）を追加','admin.htmlの運営用コンテンツに経理・収支システムと経営ダッシュボードへのリンクを追加']
+          for x in reversed(additions):
+              if x not in changes: changes.insert(0,x)
+          v.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+      - name: Verify
+        run: |
+          test -f finance.html
+          test -f management.html
+          grep -q 'href="finance.html"' admin.html
+          grep -q 'href="management.html"' admin.html
+          python -m json.tool VERSION.json >/dev/null
+      - name: Commit and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/add-finance-management-links.yml
+          git add admin.html VERSION.json
+          git commit -m 'feat: add finance and management links to admin'
+          git push
