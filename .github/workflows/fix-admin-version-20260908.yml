@@ -1,0 +1,42 @@
+name: Fix admin version source
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-admin-version-20260908.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix admin version source and bump patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin.html')
+          s=p.read_text(encoding='utf-8')
+          old="https://raw.githubusercontent.com/vocalink-team/valor-any-tournament-manager/main/VERSION.v1.0.0.json"
+          new="https://raw.githubusercontent.com/vocalink-team/valor-any-tournament-manager/main/VERSION.json"
+          if old not in s:
+              raise SystemExit('old version source not found')
+          p.write_text(s.replace(old,new),encoding='utf-8')
+          v=Path('VERSION.json')
+          import json
+          d=json.loads(v.read_text(encoding='utf-8'))
+          d['version']='v1.1.4'
+          d['updated']='2026-09-08'
+          d['changes']=['admin.htmlのVALORANT管理システムのバージョン参照先をVERSION.v1.0.0.jsonからVERSION.jsonへ修正']+d.get('changes',[])
+          v.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+          PY
+      - name: Commit and remove temporary workflow
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add admin.html VERSION.json
+          git commit -m 'fix: correct admin version management source'
+          git push
+          git rm .github/workflows/fix-admin-version-20260908.yml
+          git commit -m 'chore: remove temporary version fix workflow'
+          git push
