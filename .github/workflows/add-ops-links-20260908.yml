@@ -1,0 +1,39 @@
+name: Add operations links to admin
+on:
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update admin.html
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('admin.html')
+          s=p.read_text(encoding='utf-8')
+          css='<style> .ops-links{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.ops-link{display:block;padding:18px;border:1px solid var(--line);border-radius:14px;background:#171c22;text-decoration:none;transition:.2s}.ops-link:hover{transform:translateY(-2px);border-color:#64717d;background:#1b2128}.ops-link strong{display:block;color:var(--text);font-size:15px;margin-bottom:6px}.ops-link span{color:var(--muted);font-size:12px}@media(max-width:800px){.ops-links{grid-template-columns:1fr}}</style>'
+          marker='</style>'
+          if '.ops-links{' not in s:
+              s=s.replace(marker,css+marker,1)
+          block='<div class="panel"><div class="eyebrow">OPERATIONS LINKS</div><h2>運営用コンテンツ</h2><p class="msg">Vocalink-teamの運営に使用する各システムへアクセスできます。</p><div class="ops-links"><a class="ops-link" href="sales.html"><strong>営業管理システム →</strong><span>顧客・営業案件・営業活動・パイプラインを管理</span></a><a class="ops-link" href="projects.html"><strong>案件管理システム →</strong><span>制作案件・タスク・進捗・納期を管理</span></a></div></div>'
+          if 'OPERATIONS LINKS' not in s:
+              s=s.replace('<section id="operations" class="tab hidden">', '<section id="operations" class="tab hidden">'+block, 1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add admin.html
+          git diff --cached --quiet || git commit -m 'feat: add operations system links to admin'
+          git push
+      - name: Remove temporary workflow
+        if: success()
+        run: |
+          rm .github/workflows/add-ops-links-20260908.yml
+          git add .github/workflows/add-ops-links-20260908.yml
+          git commit -m 'chore: remove temporary operations links workflow' || true
+          git push || true
