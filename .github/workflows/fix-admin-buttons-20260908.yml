@@ -1,0 +1,50 @@
+name: Fix admin button runtime error
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-admin-buttons-20260908.yml'
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch admin.html and version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          p=Path('admin.html')
+          s=p.read_text()
+          bad="$('#deleteRequest').onclick=async()=>{await deleteRequest(r.id)}=await sb.from('service_requests').delete().eq('id',r.id);if(error){$('#saveMsg').textContent='削除に失敗しました: '+error.message;return}$('#requestModal').classList.remove('open');await loadRequests()}"
+          good="$('#deleteRequest').onclick=async()=>{await deleteRequest(r.id)}"
+          if bad not in s:
+              raise SystemExit('target runtime-error string not found')
+          s=s.replace(bad,good,1)
+          old="if(error||!session)return false;const role=session.user?.app_metadata?.role||'';$('#who').textContent=`${session.user.email||''} / ${role||'authenticated'}`;$('#login').classList.add('hidden');$('#app').classList.remove('hidden');return true"
+          new="if(error||!session)return false;const role=session.user?.app_metadata?.role||'';if(!isAdmin(session.user)){$('#loginMsg').textContent='管理者権限がありません。';await sb.auth.signOut();return false}$('#who').textContent=`${session.user.email||''} / ${role}`;$('#login').classList.add('hidden');$('#app').classList.remove('hidden');return true"
+          if old not in s:
+              raise SystemExit('target requireAdmin string not found')
+          s=s.replace(old,new,1)
+          s=s.replace('colspan="8" class="empty">取得エラー','colspan="9" class="empty">取得エラー',1)
+          p.write_text(s)
+          v=Path('VERSION.json')
+          d=json.loads(v.read_text())
+          d['version']='v1.1.3'
+          d['updated']='2026-09-08'
+          d['changes']=[
+            'admin.htmlの制作依頼削除ボタンで発生していたJavaScript構文エラーを修正',
+            '構文エラーによる後続の全ボタンイベント停止を防止',
+            '管理画面の管理者権限チェックを強化',
+            '制作依頼取得エラー表示の列数を修正'
+          ]+d.get('changes',[])
+          v.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
+          PY
+      - name: Commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add admin.html VERSION.json .github/workflows/fix-admin-buttons-20260908.yml
+          git commit -m 'fix: restore admin button handlers'
+          git push
