@@ -1,6 +1,6 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v1.1.4",
+  "version": "v1.2.0",
   "updated": "2026-09-08",
   "versioning": {
     "major": "大規模変更",
@@ -8,6 +8,11 @@
     "patch": "軽微な修正"
   },
   "changes": [
+    "運営用の営業管理システム（sales.html）を追加",
+    "営業管理に顧客・営業案件・営業ステージ・確度・次回連絡・活動履歴を追加",
+    "運営用の案件管理システム（projects.html）を追加",
+    "案件管理に進捗・ステータス・優先度・納期・担当者・タスク・更新履歴を追加",
+    "営業・案件管理データ用のSupabaseテーブルとRLSを追加",
     "admin.htmlのVALORANT管理システムのバージョン参照先をVERSION.v1.0.0.jsonからVERSION.jsonへ修正",
     "admin.htmlの制作依頼削除ボタンで発生していたJavaScript構文エラーを修正",
     "構文エラーによる後続の全ボタンイベント停止を防止",
