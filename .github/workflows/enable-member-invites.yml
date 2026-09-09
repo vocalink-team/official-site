@@ -1,0 +1,55 @@
+name: Enable member invitations
+on:
+  push:
+    paths:
+      - '.github/workflows/enable-member-invites.yml'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update members page
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          p = Path('members.html')
+          s = p.read_text(encoding='utf-8')
+          old_note = 'ここではチーム内の権限・状態を管理します。Supabase Authのアカウント作成・招待そのものはサーバー側の管理機能が必要なため、この画面では実行しません。登録後、Auth側で招待/アカウント作成し、同じメールアドレスで紐付けます。'
+          new_note = 'メールアドレスを入力して「招待メールを送信」を押すと、Supabase Authから招待メールを送信します。招待された人はメールのリンクからパスワードを設定してログインできます。招待には管理者権限が必要です。'
+          s = s.replace(old_note, new_note)
+          old_buttons = '<button class="btn primary" id="saveMember">保存</button><button class="btn danger" id="deleteMember">削除</button>'
+          new_buttons = '<button class="btn primary" id="saveMember">保存</button><button class="btn primary" id="inviteMember">招待メールを送信</button><button class="btn danger" id="deleteMember">削除</button>'
+          s = s.replace(old_buttons, new_buttons)
+          marker = "$('#saveMember').onclick=async()=>{"
+          invite = """$('#inviteMember').onclick=async()=>{const email=$('#mEmail').value.trim().toLowerCase(),name=$('#mName').value.trim(),role=$('#mRole').value,dept=$('#mDept').value.trim()||'general',notes=$('#mNotes').value;if(!email||!name){$('#modalMsg').textContent='メールアドレスと表示名は必須です。';return}if(role==='super_admin'&&currentRole!=='super_admin'){$('#modalMsg').textContent='Super Adminへの招待はSuper Adminのみ実行できます。';return}$('#inviteMember').disabled=true;$('#modalMsg').textContent='招待メールを送信しています…';try{const{data:{session}}=await sb.auth.getSession();if(!session){$('#modalMsg').textContent='ログインセッションがありません。';return}const{data,error}=await sb.functions.invoke('team-member-invite',{body:{email,display_name:name,role_key:role,department:dept,notes,redirect_to:`${location.origin}${location.pathname.replace(/[^/]*$/,'')}auth-setup.html`}});if(error)throw error;if(data?.error)throw new Error(data.error);$('#modalMsg').textContent=data?.message||'招待メールを送信しました。';await loadMembers();await loadAudit();}catch(e){$('#modalMsg').textContent='招待に失敗しました: '+(e.message||e)}finally{$('#inviteMember').disabled=false}};"""
+          if marker in s and 'id="inviteMember"' in s and 'team-member-invite' not in s:
+              s = s.replace(marker, invite + marker, 1)
+          p.write_text(s, encoding='utf-8')
+
+      - name: Bump version
+        shell: python
+        run: |
+          from pathlib import Path
+          import json
+          p=Path('VERSION.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          d['version']='v2.3.0'
+          d['updated']='2026-09-09'
+          changes=d.get('changes',[])
+          item='members.htmlからSupabase Authの招待メールを送信し、招待ユーザーがパスワードを設定できるように変更'
+          if item not in changes: changes.append(item)
+          d['changes']=changes
+          p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add members.html VERSION.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'feat: add member invitation flow'
+          git push
