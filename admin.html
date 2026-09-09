@@ -16,6 +16,13 @@
 </section></main>
 <div id="requestModal" class="modal"><div class="modal-card"><button id="closeRequest" class="btn close">閉じる</button><div class="eyebrow">REQUEST DETAIL</div><h2 id="detailTitle"></h2><div id="detailBody"></div></div></div>
 <script type="module">
+// ROLE ACCESS FILTER: the database remains the security boundary; this only hides unavailable navigation.
+import{createClient as createRoleClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const roleClient=createRoleClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe');
+(async()=>{try{const{data:{session}}=await roleClient.auth.getSession();if(!session)return;const links={sales:'sales.html',projects:'projects.html',finance:'finance.html',invoices:'invoice.html',customers:'customers.html',members:'members.html',management:'management.html'};for(const[k,u]of Object.entries(links)){const{data:ok}=await roleClient.rpc('has_team_permission',{p_permission:k==='invoices'?'invoices':k,p_action:'view'});if(ok===false){document.querySelectorAll(`a[href="${u}"]`).forEach(x=>x.style.display='none')}}}catch(e){console.error('ROLE ACCESS FILTER',e)}})();
+// ROLE ACCESS FILTER
+</script>
+<script type="module">
 import{createClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const sb=createClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe');const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);const esc=s=>String(s??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));let apps=[],requests=[];
 function isAdmin(user){const role=user?.app_metadata?.role;return role==='admin'||role==='super_admin'}
