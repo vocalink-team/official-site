@@ -1,0 +1,103 @@
+name: Apply role-based access guards
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[role-sync]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply permission-aware guards
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
+          import re, json
+
+          pages = {
+              'sales.html': 'sales',
+              'customers.html': 'customers',
+              'projects.html': 'projects',
+              'finance.html': 'finance',
+              'invoice.html': 'invoices',
+              'management.html': 'management',
+          }
+
+          changed=[]
+          for fn, permission in pages.items():
+              p=Path(fn)
+              if not p.exists():
+                  continue
+              s=p.read_text(encoding='utf-8')
+              original=s
+              # Pages using the common async guard pattern.
+              s=s.replace(
+                  "if(!session||!admin(session.user))return false;",
+                  f"if(!session)return false;const{{data:allowed,error:permissionError}}=await sb.rpc('has_team_permission',{{p_permission:'{permission}',p_action:'view'}});if(permissionError||!allowed){{$('#loginMsg').textContent='このシステムへのアクセス権限がありません。';await sb.auth.signOut();return false;}}",
+              )
+              # Some pages use requireAdmin with a separate isAdmin check.
+              s=s.replace(
+                  "if(error||!session)return false;if(!isAdmin(session.user))",
+                  f"if(error||!session)return false;const{{data:allowed,error:permissionError}}=await sb.rpc('has_team_permission',{{p_permission:'{permission}',p_action:'view'}});if(permissionError||!allowed)"
+              )
+              # Finance has a compact auth function that replaces the whole body on denial.
+              if fn=='finance.html':
+                  s=re.sub(
+                      r"async function auth\(\)\{.*?return true\}",
+                      "async function auth(){const{data:{session}}=await sb.auth.getSession();if(!session){document.body.innerHTML='<main class=\"wrap\"><div class=\"p\"><h2>ログインが必要です</h2><p class=\"muted\">Supabaseへログインしてください。</p></div></main>';return false}const{data:allowed,error:permissionError}=await sb.rpc('has_team_permission',{p_permission:'finance',p_action:'view'});if(permissionError||!allowed){document.body.innerHTML='<main class=\"wrap\"><div class=\"p\"><h2>アクセス権限がありません</h2><p class=\"muted\">このシステムを利用する権限がありません。</p></div></main>';return false}return true}",
+                      s,
+                      count=1,
+                      flags=re.S,
+                  )
+              if s!=original:
+                  p.write_text(s,encoding='utf-8')
+                  changed.append(fn)
+
+          # Make the admin operations center show only systems the signed-in user can view.
+          p=Path('admin.html')
+          if p.exists():
+              s=p.read_text(encoding='utf-8')
+              original=s
+              marker='<script type="module">'
+              if marker in s and 'ROLE ACCESS FILTER' not in s:
+                  inject="""<script type=\"module\">\n// ROLE ACCESS FILTER: the database remains the security boundary; this only hides unavailable navigation.\nimport{createClient as createRoleClient}from'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';\nconst roleClient=createRoleClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe');\n(async()=>{try{const{data:{session}}=await roleClient.auth.getSession();if(!session)return;const links={sales:'sales.html',projects:'projects.html',finance:'finance.html',invoices:'invoice.html',customers:'customers.html',members:'members.html',management:'management.html'};for(const[k,u]of Object.entries(links)){const{data:ok}=await roleClient.rpc('has_team_permission',{p_permission:k==='invoices'?'invoices':k,p_action:'view'});if(ok===false){document.querySelectorAll(`a[href=\"${u}\"]`).forEach(x=>x.style.display='none')}}}catch(e){console.error('ROLE ACCESS FILTER',e)}})();\n// ROLE ACCESS FILTER\n</script>\n"""
+                  s=s.replace(marker,inject+marker,1)
+              if s!=original:
+                  p.write_text(s,encoding='utf-8')
+                  changed.append('admin.html')
+
+          if changed:
+              v=Path('VERSION.json')
+              if v.exists():
+                  try:
+                      d=json.loads(v.read_text(encoding='utf-8'))
+                      d['version']='v2.2.0'; d['updated']='2026-09-09'
+                      d.setdefault('changes',[]).append('営業・顧客・案件・経理・請求書・経営システムへロール別アクセス権限を適用')
+                      d['changes'].append('管理画面の運用センターを権限に応じて表示制御')
+                      v.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+                  except Exception as e:
+                      print('VERSION update skipped:',e)
+              print('changed:',', '.join(dict.fromkeys(changed)))
+          else:
+              print('No files needed changes.')
+          PY
+      - name: Commit changes
+        run: |
+          git config user.name 'vocalink-team automation'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add sales.html customers.html projects.html finance.html invoice.html management.html admin.html VERSION.json
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'feat: apply role based access controls [role-sync]'
+          git push
