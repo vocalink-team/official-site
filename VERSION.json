@@ -1,12 +1,8 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.2.1",
+  "version": "v2.2.2",
   "updated": "2026-09-10",
-  "versioning": {
-    "major": "大規模変更",
-    "minor": "機能追加",
-    "patch": "軽微な修正"
-  },
+  "versioning": {"major":"大規模変更","minor":"機能追加","patch":"軽微な修正"},
   "changes": [
     "請求書管理・請求書発行機能を追加",
     "請求書に顧客メールアドレスを保持できるように変更",
@@ -39,6 +35,7 @@
     "経営システムにSupabase Authのログイン画面を追加し、management権限で閲覧できるように変更",
     "経理・収支システムにSupabase Authのログイン画面を追加し、finance権限で利用できるように変更",
     "経理・収支システムのログイン処理にタイムアウト・エラー表示・ボタン状態管理を追加し、ログイン中表示で停止する問題を修正",
-    "Super AdminがSuper Adminロールを付与・変更できるように権限RLSを変更"
+    "Super AdminがSuper Adminロールを付与・変更できるように権限RLSを変更",
+    "メンバー管理画面の管理者判定をteam_membersのactiveなrole_keyと連動するように修正"
   ]
 }
