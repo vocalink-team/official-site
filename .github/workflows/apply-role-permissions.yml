@@ -16,12 +16,10 @@ jobs:
         with:
           fetch-depth: 0
       - name: Apply permission-aware guards
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           python3 <<'PY'
           from pathlib import Path
-          import re, json
+          import re
 
           pages = {
               'sales.html': 'sales',
@@ -39,30 +37,23 @@ jobs:
                   continue
               s=p.read_text(encoding='utf-8')
               original=s
-              # Pages using the common async guard pattern.
               s=s.replace(
                   "if(!session||!admin(session.user))return false;",
                   f"if(!session)return false;const{{data:allowed,error:permissionError}}=await sb.rpc('has_team_permission',{{p_permission:'{permission}',p_action:'view'}});if(permissionError||!allowed){{$('#loginMsg').textContent='このシステムへのアクセス権限がありません。';await sb.auth.signOut();return false;}}",
               )
-              # Some pages use requireAdmin with a separate isAdmin check.
               s=s.replace(
                   "if(error||!session)return false;if(!isAdmin(session.user))",
                   f"if(error||!session)return false;const{{data:allowed,error:permissionError}}=await sb.rpc('has_team_permission',{{p_permission:'{permission}',p_action:'view'}});if(permissionError||!allowed)"
               )
-              # Finance has a compact auth function that replaces the whole body on denial.
               if fn=='finance.html':
                   s=re.sub(
                       r"async function auth\(\)\{.*?return true\}",
                       "async function auth(){const{data:{session}}=await sb.auth.getSession();if(!session){document.body.innerHTML='<main class=\"wrap\"><div class=\"p\"><h2>ログインが必要です</h2><p class=\"muted\">Supabaseへログインしてください。</p></div></main>';return false}const{data:allowed,error:permissionError}=await sb.rpc('has_team_permission',{p_permission:'finance',p_action:'view'});if(permissionError||!allowed){document.body.innerHTML='<main class=\"wrap\"><div class=\"p\"><h2>アクセス権限がありません</h2><p class=\"muted\">このシステムを利用する権限がありません。</p></div></main>';return false}return true}",
-                      s,
-                      count=1,
-                      flags=re.S,
-                  )
+                      s,count=1,flags=re.S)
               if s!=original:
                   p.write_text(s,encoding='utf-8')
                   changed.append(fn)
 
-          # Make the admin operations center show only systems the signed-in user can view.
           p=Path('admin.html')
           if p.exists():
               s=p.read_text(encoding='utf-8')
@@ -76,16 +67,6 @@ jobs:
                   changed.append('admin.html')
 
           if changed:
-              v=Path('VERSION.json')
-              if v.exists():
-                  try:
-                      d=json.loads(v.read_text(encoding='utf-8'))
-                      d['version']='v2.2.0'; d['updated']='2026-09-09'
-                      d.setdefault('changes',[]).append('営業・顧客・案件・経理・請求書・経営システムへロール別アクセス権限を適用')
-                      d['changes'].append('管理画面の運用センターを権限に応じて表示制御')
-                      v.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-                  except Exception as e:
-                      print('VERSION update skipped:',e)
               print('changed:',', '.join(dict.fromkeys(changed)))
           else:
               print('No files needed changes.')
@@ -94,10 +75,10 @@ jobs:
         run: |
           git config user.name 'vocalink-team automation'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add sales.html customers.html projects.html finance.html invoice.html management.html admin.html VERSION.json
+          git add sales.html customers.html projects.html finance.html invoice.html management.html admin.html
           if git diff --cached --quiet; then
             echo 'No changes to commit.'
             exit 0
           fi
-          git commit -m 'feat: apply role based access controls [role-sync]'
+          git commit -m 'chore: sync role guards [role-sync]'
           git push
