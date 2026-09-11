@@ -1,9 +1,10 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.4.1",
+  "version": "v2.4.2",
   "updated": "2026-09-12",
   "versioning": {"major":"大規模変更","minor":"機能追加","patch":"軽微な修正"},
   "changes": [
+    "マニュアルに改訂日を記載",
     "請求書管理・請求書発行機能を追加",
     "請求書に顧客メールアドレスを保持できるように変更",
     "請求書をブラウザの印刷画面からPDFとして保存できるように変更",
