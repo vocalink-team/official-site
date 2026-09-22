@@ -1,15 +1,16 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.6.0",
-  "updated": "2026-09-22T00:15:32Z",
+  "version": "v2.7.0",
+  "updated": "2026-09-22T07:24:49Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add admin password reset page",
     "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "dc11e3f0be0c668a78dc4b9cee7bec6f55d5fc62"
+  "commit": "8db8cd56fa27f020e2607446e8c0658b712ff3dc"
 }
