@@ -1,14 +1,15 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.5.4",
-  "updated": "2026-09-22T00:15:07Z",
+  "version": "v2.6.0",
+  "updated": "2026-09-22T00:15:32Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "3d9a682c11fa08896829ccf720fb6208912bf3e0"
+  "commit": "dc11e3f0be0c668a78dc4b9cee7bec6f55d5fc62"
 }
