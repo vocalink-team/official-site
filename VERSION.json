@@ -1,18 +1,19 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.7.2",
-  "updated": "2026-09-22T07:33:04.406Z",
+  "version": "v2.7.3",
+  "updated": "2026-09-22T07:33:14Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for password recovery fix",
     "fix: route recovery links to password reset page",
     "fix: allow recovery before admin role check",
     "feat: add admin password reset page",
     "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "51449511d2deeedb1d1a00d1d3a16981124d5edd"
+  "commit": "e5c9a15211b0ecdd61c8df2986fa6dcdb2a1fe3e"
 }
