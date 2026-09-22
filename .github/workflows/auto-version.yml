@@ -16,6 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Bump VERSION.json
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -23,25 +24,43 @@ jobs:
         run: |
           set -euo pipefail
           VERSION_FILE="VERSION.json"
+
           if [ ! -f "$VERSION_FILE" ]; then
             echo '{"version":"1.0.0","updated":"","changes":[],"commit":""}' > "$VERSION_FILE"
           fi
+
           CURRENT=$(jq -r '.version // "1.0.0"' "$VERSION_FILE")
+          CURRENT="${CURRENT#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          MAJOR="${MAJOR:-1}"
+          MINOR="${MINOR:-0}"
+          PATCH="${PATCH:-0}"
+
           SUBJECT=$(printf '%s' "$COMMIT_MESSAGE" | head -n 1)
+
           if printf '%s' "$SUBJECT" | grep -Eq '(^|[[:space:]])BREAKING CHANGE:|!:';
           then
-            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
           elif printf '%s' "$SUBJECT" | grep -Eq '^feat(\(.+\))?:';
           then
-            MINOR=$((MINOR + 1)); PATCH=0
+            MINOR=$((MINOR + 1))
+            PATCH=0
           else
             PATCH=$((PATCH + 1))
           fi
+
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           UPDATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          jq --arg version "$NEW_VERSION" --arg updated "$UPDATED" --arg changes "$SUBJECT" --arg commit "$COMMIT_SHA"             '.version=$version | .updated=$updated | .changes=[$changes] | .commit=$commit'             "$VERSION_FILE" > "$VERSION_FILE.tmp"
+
+          jq             --arg version "v$NEW_VERSION"             --arg updated "$UPDATED"             --arg changes "$SUBJECT"             --arg commit "$COMMIT_SHA"             '.version=$version
+             | .updated=$updated
+             | .commit=$commit
+             | .changes=([$changes] + (.changes // []))[:20]'             "$VERSION_FILE" > "$VERSION_FILE.tmp"
+
           mv "$VERSION_FILE.tmp" "$VERSION_FILE"
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add "$VERSION_FILE"
