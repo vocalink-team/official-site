@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.2",
-  "updated": "2026-10-01T12:00:00Z",
+  "version": "v2.11.3",
+  "updated": "2026-10-01T11:51:23Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for talent management version control",
     "feat: add talent management to admin version control",
     "feat: add talent management to version control",
     "chore: bump version for signature verification",
@@ -26,9 +27,7 @@
     "feat: strengthen signature identity and cryptographic signing",
     "chore: bump version for VocalinkSign",
     "feat: add VocalinkSign digital signature MVP",
-    "feat: add digital signature to operations center",
-    "chore: bump version for password recovery fix",
-    "fix: route recovery links to password reset page"
+    "feat: add digital signature to operations center"
   ],
-  "commit": "da37d2f4f08fa7c53010f9b8742c65ee5a500c71"
+  "commit": "fc43177a30162c540e5e6d72b4b2b241c744ffda"
 }
