@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.14",
-  "updated": "2026-10-01T14:52:21Z",
+  "version": "v2.11.15",
+  "updated": "2026-10-01T14:56:45Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: align official site version and primary request CTA",
     "chore: bump official-site version to 2.5.4",
     "fix: complete progressive production request form",
     "style: improve production request form conversion UX",
@@ -26,8 +27,7 @@
     "feat: expose signature manifest after signing",
     "fix: generate signature manifest server-side",
     "chore: bump version for talent management version control",
-    "feat: add talent management to admin version control",
-    "feat: add talent management to version control"
+    "feat: add talent management to admin version control"
   ],
-  "commit": "9f32774996bd61fb110435c988a689dc3698ec26"
+  "commit": "bcac57a5f917b85306f7b893b4552962a846464c"
 }
