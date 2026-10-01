@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.12.0",
-  "updated": "2026-10-01T11:50:59Z",
+  "version": "v2.11.2",
+  "updated": "2026-10-01T12:00:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add talent management to admin version control",
     "feat: add talent management to version control",
     "chore: bump version for signature verification",
     "feat: add independent ECDSA signature verification page",
