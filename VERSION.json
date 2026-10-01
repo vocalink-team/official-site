@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.9.0",
-  "updated": "2026-10-01T11:13:11.768Z",
+  "version": "v2.9.1",
+  "updated": "2026-10-01T11:13:21Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for electronic signature security",
     "feat: strengthen VocalinkSign for electronic-signature requirements",
     "feat: add signer email identity verification",
     "feat: add ECDSA P-256 cryptographic signatures",
@@ -23,5 +24,5 @@
     "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "b4932a291aa01bbf6a34742da212c5fa0e7e3a31"
+  "commit": "16bb6394b9e38734e587d618826df7dd4e4fb864"
 }
