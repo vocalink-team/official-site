@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.3",
-  "updated": "2026-10-01T11:51:23Z",
+  "version": "v2.11.4",
+  "updated": "2026-10-01T12:59:36Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: generate signature manifest server-side",
     "chore: bump version for talent management version control",
     "feat: add talent management to admin version control",
     "feat: add talent management to version control",
@@ -26,8 +27,7 @@
     "feat: add signed document manifest and verification metadata",
     "feat: strengthen signature identity and cryptographic signing",
     "chore: bump version for VocalinkSign",
-    "feat: add VocalinkSign digital signature MVP",
-    "feat: add digital signature to operations center"
+    "feat: add VocalinkSign digital signature MVP"
   ],
-  "commit": "fc43177a30162c540e5e6d72b4b2b241c744ffda"
+  "commit": "97929cc8e93199f9e92d6cea14f0cb711ea0dbd1"
 }
