@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.4",
-  "updated": "2026-10-01T12:00:00Z",
+  "version": "v2.11.5",
+  "updated": "2026-10-01T13:00:16Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for signature manifest generation",
     "feat: generate and store signature manifest JSON on signing",
     "feat: expose signed manifest download from signing result",
     "feat: expose signature manifest after signing",
@@ -26,10 +27,7 @@
     "chore: bump version for electronic signature security",
     "feat: strengthen VocalinkSign for electronic-signature requirements",
     "feat: add signer email identity verification",
-    "feat: add ECDSA P-256 cryptographic signatures",
-    "feat: add signed document manifest and verification metadata",
-    "feat: strengthen signature identity and cryptographic signing",
-    "chore: bump version for VocalinkSign"
+    "feat: add ECDSA P-256 cryptographic signatures"
   ],
-  "commit": "243919215dbdbe039def9c7d6a6bac0a5988b62d"
+  "commit": "a69f81830d96abf210857a3f50f66474d6a88774"
 }
