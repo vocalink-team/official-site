@@ -8,6 +8,7 @@
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: prevent signer label glyph corruption in signed PDFs",
     "fix: allow signature manifest JSON storage",
     "fix: allow application/json in signature document storage for manifest generation",
     "fix: repair signature request creation",
