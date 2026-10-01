@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.16",
-  "updated": "2026-10-01T14:57:24Z",
+  "version": "v2.11.17",
+  "updated": "2026-10-01T14:57:39Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: sync version metadata commit",
     "chore: bump official-site version to 2.11.15",
     "feat: improve official site production request conversion funnel",
     "feat: add contextual request CTAs to services and portfolio",
@@ -27,5 +28,5 @@
     "chore: bump version for signature manifest generation",
     "feat: generate and store signature manifest JSON on signing"
   ],
-  "commit": "21d86e9bca18ec6545c6b95e0fc7e665a0050e7d"
+  "commit": "6af46b0195642d3795a2de2a8a58f3a6c0d8e5ff"
 }
