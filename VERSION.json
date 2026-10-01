@@ -8,6 +8,7 @@
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font",
     "chore: bump version for signer label fix",
     "fix: prevent signer label glyph corruption in signed PDFs",
     "fix: allow signature manifest JSON storage",
