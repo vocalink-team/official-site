@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.9.2",
-  "updated": "2026-10-01T19:00:00+09:00",
+  "version": "v2.9.3",
+  "updated": "2026-10-01T11:20:59Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for Japanese PDF font fix",
     "fix: embed Japanese font for signer names in signed PDFs",
     "chore: bump version for electronic signature security",
     "feat: strengthen VocalinkSign for electronic-signature requirements",
@@ -25,5 +26,5 @@
     "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "16bb6394b9e38734e587d618826df7dd4e4fb864"
+  "commit": "677e1aeb01691461e4d91c7be5556cb2dcdc94cd"
 }
