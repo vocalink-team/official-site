@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.6",
-  "updated": "2026-10-01T13:10:00Z",
+  "version": "v2.11.7",
+  "updated": "2026-10-01T13:04:07Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: repair signature request creation",
     "fix: prevent signature request creation from referencing an uninitialized signer",
     "fix: deploy signature service create flow",
     "chore: bump version for signature manifest generation",
@@ -26,10 +27,7 @@
     "fix: use official Noto Sans JP font for PDF signing",
     "chore: bump version for Japanese PDF font fix",
     "fix: embed Japanese font for signer names in signed PDFs",
-    "chore: bump version for electronic signature security",
-    "feat: strengthen VocalinkSign for electronic-signature requirements",
-    "feat: add signer email identity verification",
-    "feat: add ECDSA P-256 cryptographic signatures"
+    "chore: bump version for electronic signature security"
   ],
-  "commit": "a69f81830d96abf210857a3f50f66474d6a88774"
+  "commit": "d33a165ae45f1946e3e963f3854663986170cf71"
 }
