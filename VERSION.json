@@ -12,8 +12,6 @@
     "feat: improve official site production request conversion funnel",
     "feat: add contextual request CTAs to services and portfolio",
     "feat: prefill production request form from contextual CTAs",
-    "chore: bump official-site version to 2.11.15",
-    "feat: add contextual request CTAs to services and portfolio",
     "fix: align official site version and primary request CTA",
     "fix: complete progressive production request form",
     "style: improve production request form conversion UX",
