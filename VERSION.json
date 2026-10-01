@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.11.0",
-  "updated": "2026-10-01T11:33:15Z",
+  "updated": "2026-10-01T19:35:00+09:00",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add independent ECDSA signature verification page",
     "feat: add digital signature verification page",
     "chore: bump version for signature lifecycle",
     "feat: add signature request expiration, resend and cancellation lifecycle",
