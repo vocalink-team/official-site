@@ -1,6 +1,6 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.7",
+  "version": "v2.11.8",
   "updated": "2026-10-01T13:04:07Z",
   "versioning": {
     "major": "大規模変更",
@@ -8,6 +8,7 @@
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: allow application/json in signature document storage for manifest generation",
     "fix: repair signature request creation",
     "fix: prevent signature request creation from referencing an uninitialized signer",
     "fix: deploy signature service create flow",
