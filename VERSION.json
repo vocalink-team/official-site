@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.10.1",
-  "updated": "2026-10-01T11:33:03Z",
+  "version": "v2.11.0",
+  "updated": "2026-10-01T11:33:15Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add digital signature verification page",
     "chore: bump version for signature lifecycle",
     "feat: add signature request expiration, resend and cancellation lifecycle",
     "fix: use official Noto Sans JP font for PDF signing",
@@ -26,8 +27,7 @@
     "fix: route recovery links to password reset page",
     "fix: allow recovery before admin role check",
     "feat: add admin password reset page",
-    "feat: add VocalinkFind to version management",
-    "chore: add automatic version management"
+    "feat: add VocalinkFind to version management"
   ],
-  "commit": "0cb18d4c9c96bb7e713f364cb2aa30723d8eb3f2"
+  "commit": "66cc1e8837f6588c76b55f8c65ac9ef3901c49e7"
 }
