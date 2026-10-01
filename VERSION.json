@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.8.0",
-  "updated": "2026-10-01T11:08:37.913Z",
+  "version": "v2.8.1",
+  "updated": "2026-10-01T11:08:47Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for VocalinkSign",
     "feat: add VocalinkSign digital signature MVP",
     "feat: add digital signature to operations center",
     "chore: bump version for password recovery fix",
@@ -17,5 +18,5 @@
     "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "38dea62deddb924d2ea327bf94b65be8f542ea87"
+  "commit": "97391aa0b221be555f739fae903d122166d82b8f"
 }
