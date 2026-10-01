@@ -1,16 +1,19 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.12.0",
-  "updated": "2026-10-01T14:57:02Z",
+  "version": "v2.11.15",
+  "updated": "2026-10-01T15:00:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: improve official site production request conversion funnel",
+    "feat: add contextual request CTAs to services and portfolio",
+    "feat: prefill production request form from contextual CTAs",
+    "chore: bump official-site version to 2.11.15",
     "feat: add contextual request CTAs to services and portfolio",
     "fix: align official site version and primary request CTA",
-    "chore: bump official-site version to 2.5.4",
     "fix: complete progressive production request form",
     "style: improve production request form conversion UX",
     "chore: bump version for full signer name fix",
