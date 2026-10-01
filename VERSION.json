@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.8",
-  "updated": "2026-10-01T13:04:07Z",
+  "version": "v2.11.9",
+  "updated": "2026-10-01T13:36:32Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: allow signature manifest JSON storage",
     "fix: allow application/json in signature document storage for manifest generation",
     "fix: repair signature request creation",
     "fix: prevent signature request creation from referencing an uninitialized signer",
@@ -26,9 +27,7 @@
     "chore: bump version for signature lifecycle",
     "feat: add signature request expiration, resend and cancellation lifecycle",
     "fix: use official Noto Sans JP font for PDF signing",
-    "chore: bump version for Japanese PDF font fix",
-    "fix: embed Japanese font for signer names in signed PDFs",
-    "chore: bump version for electronic signature security"
+    "chore: bump version for Japanese PDF font fix"
   ],
-  "commit": "d33a165ae45f1946e3e963f3854663986170cf71"
+  "commit": "0aaf21af0d08078740c47ccf1d8ec6d6f20ca61a"
 }
