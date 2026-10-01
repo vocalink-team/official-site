@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.10.0",
-  "updated": "2026-10-01T19:20:00+09:00",
+  "version": "v2.10.1",
+  "updated": "2026-10-01T11:33:03Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for signature lifecycle",
     "feat: add signature request expiration, resend and cancellation lifecycle",
     "fix: use official Noto Sans JP font for PDF signing",
     "chore: bump version for Japanese PDF font fix",
@@ -28,5 +29,5 @@
     "feat: add VocalinkFind to version management",
     "chore: add automatic version management"
   ],
-  "commit": "df7069aeb488fbd477e5029bb9119965ec507b7f"
+  "commit": "0cb18d4c9c96bb7e713f364cb2aa30723d8eb3f2"
 }
