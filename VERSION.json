@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.18",
-  "updated": "2026-10-01T23:34:45.036Z",
+  "version": "v2.11.19",
+  "updated": "2026-10-01T23:34:56Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump official-site version to 2.11.18",
     "fix: resolve iPad signature Load failed caused by redirected font fetch",
     "chore: sync version metadata commit",
     "chore: bump official-site version to 2.11.15",
@@ -26,8 +27,7 @@
     "fix: repair signature request creation",
     "fix: prevent signature request creation from referencing an uninitialized signer",
     "fix: deploy signature service create flow",
-    "chore: bump version for signature manifest generation",
-    "feat: generate and store signature manifest JSON on signing"
+    "chore: bump version for signature manifest generation"
   ],
-  "commit": "ac9e7110a1adde532f7b94b9d31bd783da511cd3"
+  "commit": "53af50e1e42304efca133d5fc7ee2bfc71892c29"
 }
