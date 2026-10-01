@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.10",
-  "updated": "2026-10-01T13:40:23Z",
+  "version": "v2.11.11",
+  "updated": "2026-10-01T13:43:48Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for full signer name fix",
     "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font",
     "chore: bump version for signer label fix",
     "fix: prevent signer label glyph corruption in signed PDFs",
@@ -26,9 +27,7 @@
     "feat: add talent management to version control",
     "chore: bump version for signature verification",
     "feat: add independent ECDSA signature verification page",
-    "feat: add digital signature verification page",
-    "chore: bump version for signature lifecycle",
-    "feat: add signature request expiration, resend and cancellation lifecycle"
+    "feat: add digital signature verification page"
   ],
-  "commit": "3bf8c7e88dc0403bd13733c741f7d49ce42a0795"
+  "commit": "accdb5d10216828b5a004e309c6b62443bb02c14"
 }
