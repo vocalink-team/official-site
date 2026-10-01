@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.0",
-  "updated": "2026-10-01T19:35:00+09:00",
+  "version": "v2.11.1",
+  "updated": "2026-10-01T11:33:32Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump version for signature verification",
     "feat: add independent ECDSA signature verification page",
     "feat: add digital signature verification page",
     "chore: bump version for signature lifecycle",
@@ -26,9 +27,7 @@
     "feat: add digital signature to operations center",
     "chore: bump version for password recovery fix",
     "fix: route recovery links to password reset page",
-    "fix: allow recovery before admin role check",
-    "feat: add admin password reset page",
-    "feat: add VocalinkFind to version management"
+    "fix: allow recovery before admin role check"
   ],
-  "commit": "66cc1e8837f6588c76b55f8c65ac9ef3901c49e7"
+  "commit": "e43b7d55d027c6e42fa0386c54ea93adb8bbb02b"
 }
