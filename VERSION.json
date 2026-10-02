@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.22",
-  "updated": "2026-10-02T14:08:00Z",
+  "version": "v2.11.23",
+  "updated": "2026-10-02T14:06:58Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump official-site version for P0 security hardening",
     "chore: bump official-site version to 2.11.22",
     "security: complete P0 SECURITY DEFINER privilege hardening phase",
     "security: switch safe helper RPCs to SECURITY INVOKER",
@@ -26,12 +27,7 @@
     "chore: bump official-site version to 2.11.15",
     "feat: improve official site production request conversion funnel",
     "feat: add contextual request CTAs to services and portfolio",
-    "feat: prefill production request form from contextual CTAs",
-    "fix: align official site version and primary request CTA",
-    "fix: complete progressive production request form",
-    "style: improve production request form conversion UX",
-    "chore: bump version for full signer name fix",
-    "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font"
+    "feat: prefill production request form from contextual CTAs"
   ],
-  "commit": "p0_security_definer_hardening_phase2"
+  "commit": "1d8fff710a6e973e98115eb5e25815fd3c03a03a"
 }
