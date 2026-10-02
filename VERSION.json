@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.12.0",
-  "updated": "2026-10-02T14:46:38Z",
+  "version": "v2.12.1",
+  "updated": "2026-10-02T14:50:14Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: align status services with version management",
     "feat: link service status from official site",
     "chore: bump official-site version for P0 security hardening",
     "chore: bump official-site version to 2.11.22",
@@ -26,8 +27,7 @@
     "fix: resolve iPad signature Load failed caused by redirected font fetch",
     "chore: sync version metadata commit",
     "chore: bump official-site version to 2.11.15",
-    "feat: improve official site production request conversion funnel",
-    "feat: add contextual request CTAs to services and portfolio"
+    "feat: improve official site production request conversion funnel"
   ],
-  "commit": "da466f70ebddd47d32d91a71d08b9ba34cff616f"
+  "commit": "cdfae8479ae610dfdeedb8081ed1095d42f1073b"
 }
