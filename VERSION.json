@@ -1,13 +1,15 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.11.21",
-  "updated": "2026-10-02T13:56:20Z",
+  "updated": "2026-10-02T13:58:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump official-site version to 2.11.21",
+    "chore: sync version metadata commit reference",
     "chore: bump official-site version to 2.11.20",
     "chore: bump official-site version to 2.11.20",
     "security: harden SECURITY DEFINER execution privileges",
