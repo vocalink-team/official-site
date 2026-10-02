@@ -1,13 +1,17 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.11.22",
-  "updated": "2026-10-02T13:57:02Z",
+  "updated": "2026-10-02T14:08:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump official-site version to 2.11.22",
+    "security: complete P0 SECURITY DEFINER privilege hardening phase",
+    "security: switch safe helper RPCs to SECURITY INVOKER",
+    "security: restrict team permission helper to authenticated RLS use",
     "chore: sync official-site version metadata",
     "chore: bump official-site version to 2.11.21",
     "chore: sync version metadata commit reference",
@@ -29,5 +33,5 @@
     "chore: bump version for full signer name fix",
     "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font"
   ],
-  "commit": "1474ef484fe276b89544231483fe89e191d4f52a"
+  "commit": "p0_security_definer_hardening_phase2"
 }
