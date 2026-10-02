@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.20",
-  "updated": "2026-10-02T13:56:30Z",
+  "version": "v2.11.21",
+  "updated": "2026-10-02T13:56:20Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: bump official-site version to 2.11.20",
     "chore: bump official-site version to 2.11.20",
     "security: harden SECURITY DEFINER execution privileges",
     "security: revoke unused record_security_event RPC execution",
@@ -26,12 +27,7 @@
     "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font",
     "chore: bump version for signer label fix",
     "fix: prevent signer label glyph corruption in signed PDFs",
-    "fix: allow signature manifest JSON storage",
-    "fix: allow application/json in signature document storage for manifest generation",
-    "fix: repair signature request creation",
-    "fix: prevent signature request creation from referencing an uninitialized signer",
-    "fix: deploy signature service create flow",
-    "chore: bump version for signature manifest generation"
+    "fix: allow signature manifest JSON storage"
   ],
-  "commit": "7fb11d094fd0fa20b83465c22a4d0c42ddc9e072"
+  "commit": "5483a773aab683a74b294342aa35943606ebf81d"
 }
