@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.11.21",
-  "updated": "2026-10-02T13:58:00Z",
+  "version": "v2.11.22",
+  "updated": "2026-10-02T13:57:02Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: sync official-site version metadata",
     "chore: bump official-site version to 2.11.21",
     "chore: sync version metadata commit reference",
     "chore: bump official-site version to 2.11.20",
@@ -26,10 +27,7 @@
     "fix: complete progressive production request form",
     "style: improve production request form conversion UX",
     "chore: bump version for full signer name fix",
-    "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font",
-    "chore: bump version for signer label fix",
-    "fix: prevent signer label glyph corruption in signed PDFs",
-    "fix: allow signature manifest JSON storage"
+    "fix: preserve full Japanese signer names in signed PDFs by using a complete Japanese font"
   ],
-  "commit": "5483a773aab683a74b294342aa35943606ebf81d"
+  "commit": "1474ef484fe276b89544231483fe89e191d4f52a"
 }
