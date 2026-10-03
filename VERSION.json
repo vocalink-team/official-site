@@ -1,13 +1,16 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.19.0",
-  "updated": "2026-10-03T11:16:08Z",
+  "version": "v2.19.1",
+  "updated": "2026-10-03",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add event analytics dashboard to admin",
+    "security: allow analytics SELECT only for admin/super_admin via RLS",
+    "test: analytics table checked before public event verification",
     "feat: add event analytics admin dashboard",
     "chore: finalize analytics release metadata",
     "feat: add privacy-minimized event analytics foundation",
