@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.19.11",
-  "updated": "2026-10-03T11:47:06Z",
+  "version": "v2.19.12",
+  "updated": "2026-10-03T11:49:29Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: synchronize page versions during auto-version bump",
     "chore: final version sync v2.19.10",
     "chore: sync displayed version to v2.19.9",
     "chore: sync displayed version to v2.19.8",
@@ -26,8 +27,7 @@
     "security: allow analytics SELECT only for admin/super_admin via RLS",
     "test: analytics table checked before public event verification",
     "feat: add event analytics admin dashboard",
-    "chore: finalize analytics release metadata",
-    "feat: add privacy-minimized event analytics foundation"
+    "chore: finalize analytics release metadata"
   ],
-  "commit": "1e3a65eb1480d1ab309a7b7dd74eecffb1003337"
+  "commit": "cecc64e611d1602ad087a2776c2965fb02672746"
 }
