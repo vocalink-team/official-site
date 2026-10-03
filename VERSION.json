@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.19.4",
-  "updated": "2026-10-03T11:33:45Z",
+  "version": "v2.19.5",
+  "updated": "2026-10-03T11:36:36Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: show counts for all supported analytics events",
     "chore: release final analytics audit fixes v2.19.3",
     "fix: analytics dashboard totals now use exact database counts",
     "fix: synchronize official/request page version metadata and cache keys to VERSION.json",
@@ -26,8 +27,7 @@
     "feat: improve works to request conversion path",
     "chore: sync status version to 2.14.0",
     "feat: manage public service status from admin",
-    "feat: load service status from Supabase",
-    "chore: sync status page version to 2.13.0"
+    "feat: load service status from Supabase"
   ],
-  "commit": "646d10ff2f831b92b1502f5170b7d51a99a5618c"
+  "commit": "9aa7c5e5e1243ff6f1da8b148bf3c6966f6944f9"
 }
