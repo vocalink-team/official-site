@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.16.0",
-  "updated": "2026-10-03T06:37:54Z",
+  "version": "v2.17.0",
+  "updated": "2026-10-03T06:38:03Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: preserve work context in request form",
     "feat: improve works to request conversion path",
     "chore: sync status version to 2.14.0",
     "feat: manage public service status from admin",
@@ -26,8 +27,7 @@
     "chore: sync version metadata commit reference",
     "chore: bump official-site version to 2.11.20",
     "chore: bump official-site version to 2.11.20",
-    "security: harden SECURITY DEFINER execution privileges",
-    "security: revoke unused record_security_event RPC execution"
+    "security: harden SECURITY DEFINER execution privileges"
   ],
-  "commit": "dc029671b06b9f0015020cf2d4ae14c44915c892"
+  "commit": "a92b31f3a5e3a09b2c612253771d59954e2105b4"
 }
