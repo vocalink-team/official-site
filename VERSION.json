@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.19.6",
-  "updated": "2026-10-03T11:36:54Z",
+  "version": "v2.19.7",
+  "updated": "2026-10-03T11:37:43Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: sync page version to v2.19.6",
     "chore: sync official site version v2.19.5",
     "fix: sync site version metadata and cache keys",
     "fix: show counts for all supported analytics event types",
@@ -26,8 +27,7 @@
     "feat: track official-site page, service, portfolio, request and contact events",
     "security: restrict public analytics writes with RLS allowlist",
     "feat: track request funnel events",
-    "feat: preserve work context in request form",
-    "feat: improve works to request conversion path"
+    "feat: preserve work context in request form"
   ],
-  "commit": "4c43dde3caee5856122b8defef528c994fd9231d"
+  "commit": "aa22403e8633c3bdca6b571700be57edae4b7150"
 }
