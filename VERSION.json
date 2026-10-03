@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.19.2",
-  "updated": "2026-10-03T11:16:25Z",
+  "version": "v2.19.3",
+  "updated": "2026-10-03T11:33:22Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: sync request page assets to v2.19.3",
     "chore: release analytics admin dashboard v2.19.1",
     "feat: add event analytics dashboard to admin",
     "security: allow analytics SELECT only for admin/super_admin via RLS",
@@ -26,8 +27,7 @@
     "chore: sync status page version to 2.13.0",
     "feat: add service status view to admin",
     "fix: align status services with version management",
-    "feat: link service status from official site",
-    "chore: bump official-site version for P0 security hardening"
+    "feat: link service status from official site"
   ],
-  "commit": "5e543573c431bd6ce62afad7366a068e05a32619"
+  "commit": "e18f93eb3294eb5a968c93ccbd28ab969300bc71"
 }
