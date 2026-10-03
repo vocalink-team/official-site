@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.15.0",
-  "updated": "2026-10-03T04:37:01Z",
+  "version": "v2.15.1",
+  "updated": "2026-10-03T04:37:14Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: sync status version to 2.14.0",
     "feat: manage public service status from admin",
     "feat: load service status from Supabase",
     "chore: sync status page version to 2.13.0",
@@ -26,8 +27,7 @@
     "chore: bump official-site version to 2.11.20",
     "security: harden SECURITY DEFINER execution privileges",
     "security: revoke unused record_security_event RPC execution",
-    "chore: complete P0 security hardening pass",
-    "chore: bump official-site version to 2.11.18"
+    "chore: complete P0 security hardening pass"
   ],
-  "commit": "314c4b1b8a7b58e8acde9991fffee979e8348dae"
+  "commit": "49635a345eb2b7f170ae06e600df542092cf1198"
 }
