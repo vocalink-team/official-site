@@ -1,13 +1,15 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.19.3",
-  "updated": "2026-10-03T11:33:22Z",
+  "updated": "2026-10-03T11:35:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: analytics dashboard totals now use exact database counts",
+    "fix: synchronize official/request page version metadata and cache keys to VERSION.json",
     "fix: sync request page assets to v2.19.3",
     "chore: release analytics admin dashboard v2.19.1",
     "feat: add event analytics dashboard to admin",
