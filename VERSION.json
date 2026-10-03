@@ -1,13 +1,16 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.18.0",
-  "updated": "2026-10-03T11:13:43Z",
+  "updated": "2026-10-03",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add privacy-minimized event analytics foundation",
+    "feat: track official-site page, service, portfolio, request and contact events",
+    "security: restrict public analytics writes with RLS allowlist",
     "feat: track request funnel events",
     "feat: preserve work context in request form",
     "feat: improve works to request conversion path",
