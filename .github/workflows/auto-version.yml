@@ -19,52 +19,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Bump VERSION.json
+      - name: Bump and synchronize version
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           COMMIT_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
           VERSION_FILE="VERSION.json"
-
-          if [ ! -f "$VERSION_FILE" ]; then
-            echo '{"version":"1.0.0","updated":"","changes":[],"commit":""}' > "$VERSION_FILE"
-          fi
-
-          CURRENT=$(jq -r '.version // "1.0.0"' "$VERSION_FILE")
+          CURRENT=$(jq -r '.version // "v1.0.0"' "$VERSION_FILE")
           CURRENT="${CURRENT#v}"
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
-          MAJOR="${MAJOR:-1}"
-          MINOR="${MINOR:-0}"
-          PATCH="${PATCH:-0}"
-
           SUBJECT=$(printf '%s' "$COMMIT_MESSAGE" | head -n 1)
-
-          if printf '%s' "$SUBJECT" | grep -Eq '(^|[[:space:]])BREAKING CHANGE:|!:';
-          then
-            MAJOR=$((MAJOR + 1))
-            MINOR=0
-            PATCH=0
-          elif printf '%s' "$SUBJECT" | grep -Eq '^feat(\(.+\))?:';
-          then
-            MINOR=$((MINOR + 1))
-            PATCH=0
+          if printf '%s' "$SUBJECT" | grep -Eq '(^|[[:space:]])BREAKING CHANGE:|!:'; then
+            MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+          elif printf '%s' "$SUBJECT" | grep -Eq '^feat(\(.+\))?:'; then
+            MINOR=$((MINOR + 1)); PATCH=0
           else
             PATCH=$((PATCH + 1))
           fi
-
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           UPDATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-          jq             --arg version "v$NEW_VERSION"             --arg updated "$UPDATED"             --arg changes "$SUBJECT"             --arg commit "$COMMIT_SHA"             '.version=$version
-             | .updated=$updated
-             | .commit=$commit
-             | .changes=([$changes] + (.changes // []))[:20]'             "$VERSION_FILE" > "$VERSION_FILE.tmp"
-
+          jq --arg version "v$NEW_VERSION" --arg updated "$UPDATED" --arg changes "$SUBJECT" --arg commit "$COMMIT_SHA" '.version=$version | .updated=$updated | .commit=$commit | .changes=([$changes] + (.changes // []))[:20]' "$VERSION_FILE" > "$VERSION_FILE.tmp"
           mv "$VERSION_FILE.tmp" "$VERSION_FILE"
-
+          sed -E -i "s/(meta name=\"version\" content=\")[0-9]+\.[0-9]+\.[0-9]+/\1$NEW_VERSION/g; s/(request-config\.js\?v=)[0-9]+\.[0-9]+\.[0-9]+/\1$NEW_VERSION/g" index.html request.html
+          sed -E -i "s/(request\.css\?v=)[0-9]+\.[0-9]+\.[0-9]+/\1$NEW_VERSION/g" request.html
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$VERSION_FILE"
-          git commit -m "chore: update version to v$NEW_VERSION" || exit 0
+          git add VERSION.json index.html request.html
+          git commit -m "chore: update and sync version to v$NEW_VERSION" || exit 0
           git push
