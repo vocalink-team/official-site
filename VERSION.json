@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.17.0",
-  "updated": "2026-10-03T06:38:03Z",
+  "version": "v2.18.0",
+  "updated": "2026-10-03T11:13:43Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: track request funnel events",
     "feat: preserve work context in request form",
     "feat: improve works to request conversion path",
     "chore: sync status version to 2.14.0",
@@ -26,8 +27,7 @@
     "chore: bump official-site version to 2.11.21",
     "chore: sync version metadata commit reference",
     "chore: bump official-site version to 2.11.20",
-    "chore: bump official-site version to 2.11.20",
-    "security: harden SECURITY DEFINER execution privileges"
+    "chore: bump official-site version to 2.11.20"
   ],
-  "commit": "a92b31f3a5e3a09b2c612253771d59954e2105b4"
+  "commit": "820acb97f899a6ffd1eefcb6f7fd20b476bbd19c"
 }
