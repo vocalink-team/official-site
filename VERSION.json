@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.19.1",
-  "updated": "2026-10-03",
+  "version": "v2.19.2",
+  "updated": "2026-10-03T11:16:25Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: release analytics admin dashboard v2.19.1",
     "feat: add event analytics dashboard to admin",
     "security: allow analytics SELECT only for admin/super_admin via RLS",
     "test: analytics table checked before public event verification",
@@ -26,11 +27,7 @@
     "feat: add service status view to admin",
     "fix: align status services with version management",
     "feat: link service status from official site",
-    "chore: bump official-site version for P0 security hardening",
-    "chore: bump official-site version to 2.11.22",
-    "security: complete P0 SECURITY DEFINER privilege hardening phase",
-    "security: switch safe helper RPCs to SECURITY INVOKER",
-    "security: restrict team permission helper to authenticated RLS use"
+    "chore: bump official-site version for P0 security hardening"
   ],
-  "commit": "164b4c6ec6e9f3911e8b086a72732b32377342a4"
+  "commit": "5e543573c431bd6ce62afad7366a068e05a32619"
 }
