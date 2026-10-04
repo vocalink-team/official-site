@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.20.1",
-  "updated": "2026-10-04T13:06:04Z",
+  "version": "v2.20.2",
+  "updated": "2026-10-04T13:07:18Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: bind signature to verified auth identity",
     "fix: bind digital signature to signed PDF hash",
     "feat: strengthen pricing and project case study",
     "fix: synchronize page versions during auto-version bump",
@@ -26,8 +27,7 @@
     "fix: sync request page assets to v2.19.3",
     "chore: release analytics admin dashboard v2.19.1",
     "feat: add event analytics dashboard to admin",
-    "security: allow analytics SELECT only for admin/super_admin via RLS",
-    "test: analytics table checked before public event verification"
+    "security: allow analytics SELECT only for admin/super_admin via RLS"
   ],
-  "commit": "5e2f4d1646520b7f5c4255ceb0bad9731c86a98c"
+  "commit": "c20453aeca112490763bfb7c1522f9d519d6c4a0"
 }
