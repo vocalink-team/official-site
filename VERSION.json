@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.20.2",
-  "updated": "2026-10-04T13:07:18Z",
+  "version": "v2.20.3",
+  "updated": "2026-10-04T13:28:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: make signature finalization atomic and restrict resend state",
     "security: bind signature to verified auth identity",
     "fix: bind digital signature to signed PDF hash",
     "feat: strengthen pricing and project case study",
