@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.20.7",
-  "updated": "2026-10-05T02:27:57Z",
+  "updated": "2026-10-05T02:34:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: validate VocalinkSign manifest content integrity during offline verification",
     "security: validate signed manifest content integrity",
     "security: make signature audit transitions atomic and clean failed request artifacts",
     "fix: clean failed signature request artifacts",
