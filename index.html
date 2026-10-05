@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="vocalink-team 公式サイト"><meta name="version" content="2.20.8">
+<meta name="description" content="vocalink-team 公式サイト"><meta name="version" content="2.21.0">
 <title>vocalink-team | 先進AIと、日本基準の調和。</title>
 <style>
 :root{--kinari:#f5f1e8;--paper:#faf8f2;--sumi:#252723;--ai:#18324a;--muted:#77766f;--line:#d7d1c5;--shu:#a44732;--kincha:#a27d3d;--max:1160px}
@@ -27,7 +27,7 @@ footer{padding:42px 0 55px;color:var(--muted);font-size:10px}.footer{display:fle
 <section id="contact"><div class="wrap"><div class="contact"><div class="section-kicker">06 / Contact</div><h2>まず、話すことから。</h2><p class="hero-copy">AI導入、開発、制作のご相談をお聞かせください。</p><div class="actions"><a class="btn primary" href="request.html">制作依頼フォームへ →</a><a class="btn" href="mailto:vocalink.team@gmail.com">メールで問い合わせ →</a></div></div></div></section>
 <section id="policies"><div class="wrap"><div class="section-kicker">07 / Policies</div><div class="section-title">規約・方針。</div><div class="policy-grid"><a class="policy" href="terms.html"><small>01 / TERMS</small>利用規約</a><a class="policy" href="privacy.html"><small>02 / PRIVACY</small>プライバシーポリシー</a><a class="policy" href="commercial-law.html"><small>03 / COMMERCIAL LAW</small>特定商取引法に基づく表記</a></div></div></section>
 </main><footer><div class="wrap footer"><span>© 2026 vocalink-team</span><div class="footer-links"><a href="terms.html">利用規約</a><a href="privacy.html">プライバシーポリシー</a><a href="commercial-law.html">特商法表記</a><a href="recruit.html">TEAM MEMBER募集</a><a href="request.html">制作依頼</a><a href="status.html">サービス提供状況</a><a href="mailto:vocalink.team@gmail.com">お問い合わせ</a></div></div></footer>
-<script src="request-config.js?v=2.20.8"></script><script>
+<script src="request-config.js?v=2.21.0"></script><script>
 const trackEvent=(event_name,target_key=null,source_key=null,metadata={})=>supabaseClient.from('analytics_events').insert({service_key:'official-site',event_name,page_path:location.pathname||'/',target_key,source_key,metadata}).then(()=>{}).catch(()=>{});
 trackEvent('page_view');
 document.querySelectorAll('#service .service').forEach((el,i)=>el.addEventListener('click',()=>trackEvent('service_view',['ai-solution','web-development','digital-design'][i]||'unknown')));
