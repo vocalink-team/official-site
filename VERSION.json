@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.20.5",
-  "updated": "2026-10-05T02:05:00Z",
+  "version": "v2.20.6",
+  "updated": "2026-10-05T02:24:09Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: clean failed signature request artifacts",
     "security: make signature request lifecycle atomic and monitor cleanup failures",
     "security: isolate signature finalizer and clean orphaned signature artifacts",
     "security: make signature finalization atomic and restrict resend state",
@@ -26,11 +27,7 @@
     "fix: show counts for all supported analytics events",
     "chore: release final analytics audit fixes v2.19.3",
     "fix: analytics dashboard totals now use exact database counts",
-    "fix: synchronize official/request page version metadata and cache keys to VERSION.json",
-    "fix: sync request page assets to v2.19.3",
-    "chore: release analytics admin dashboard v2.19.1",
-    "feat: add event analytics dashboard to admin",
-    "security: allow analytics SELECT only for admin/super_admin via RLS"
+    "fix: synchronize official/request page version metadata and cache keys to VERSION.json"
   ],
-  "commit": "c20453aeca112490763bfb7c1522f9d519d6c4a0"
+  "commit": "782fc39880424564cff2cd9406f9f3f78d318750"
 }
