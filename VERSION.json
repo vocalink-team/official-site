@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.20.4",
-  "updated": "2026-10-05T01:54:00Z",
+  "version": "v2.20.5",
+  "updated": "2026-10-05T02:05:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: make signature request lifecycle atomic and monitor cleanup failures",
     "security: isolate signature finalizer and clean orphaned signature artifacts",
     "security: make signature finalization atomic and restrict resend state",
     "security: bind signature to verified auth identity",
