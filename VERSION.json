@@ -1,14 +1,13 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.21.0",
-  "updated": "2026-10-05T12:39:57Z",
+  "version": "v2.20.7",
+  "updated": "2026-10-05T02:34:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
-    "feat: redesign corporate UI with Japanese modern aesthetic",
     "security: validate VocalinkSign manifest content integrity during offline verification",
     "security: validate signed manifest content integrity",
     "security: make signature audit transitions atomic and clean failed request artifacts",
@@ -27,7 +26,9 @@
     "chore: sync page version to v2.19.6",
     "chore: sync official site version v2.19.5",
     "fix: sync site version metadata and cache keys",
-    "fix: show counts for all supported analytics event types"
+    "fix: show counts for all supported analytics event types",
+    "fix: show counts for all supported analytics events",
+    "chore: release final analytics audit fixes v2.19.3"
   ],
-  "commit": "a0493a1ad47100048c4054b4131fb499cb1a856d"
+  "commit": "28c33a092ed81a723823176853a8298b416e175e"
 }
