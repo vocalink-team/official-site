@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
   "version": "v2.20.6",
-  "updated": "2026-10-05T02:24:09Z",
+  "updated": "2026-10-05T02:26:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: make signature audit transitions atomic and clean failed request artifacts",
     "fix: clean failed signature request artifacts",
     "security: make signature request lifecycle atomic and monitor cleanup failures",
     "security: isolate signature finalizer and clean orphaned signature artifacts",
