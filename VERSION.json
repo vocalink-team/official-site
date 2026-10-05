@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.20.6",
-  "updated": "2026-10-05T02:26:00Z",
+  "version": "v2.20.7",
+  "updated": "2026-10-05T02:27:57Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: validate signed manifest content integrity",
     "security: make signature audit transitions atomic and clean failed request artifacts",
     "fix: clean failed signature request artifacts",
     "security: make signature request lifecycle atomic and monitor cleanup failures",
@@ -26,9 +27,7 @@
     "fix: sync site version metadata and cache keys",
     "fix: show counts for all supported analytics event types",
     "fix: show counts for all supported analytics events",
-    "chore: release final analytics audit fixes v2.19.3",
-    "fix: analytics dashboard totals now use exact database counts",
-    "fix: synchronize official/request page version metadata and cache keys to VERSION.json"
+    "chore: release final analytics audit fixes v2.19.3"
   ],
-  "commit": "782fc39880424564cff2cd9406f9f3f78d318750"
+  "commit": "28c33a092ed81a723823176853a8298b416e175e"
 }
