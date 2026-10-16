@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.23.0",
-  "updated": "2026-10-16T04:43:51Z",
+  "version": "v2.23.1",
+  "updated": "2026-10-16T04:48:56Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: remove services and security section from visitor sitemap",
     "feat: add sitemap navigation in footer",
     "feat: add public sitemap and discovery metadata",
     "feat: verify VocalinkSign issuer signature for v2 manifests",
@@ -26,8 +27,7 @@
     "chore: sync displayed version to v2.19.9",
     "chore: sync displayed version to v2.19.8",
     "fix: prevent VERSION.json-only auto-version loops",
-    "chore: sync page version to v2.19.6",
-    "chore: sync official site version v2.19.5"
+    "chore: sync page version to v2.19.6"
   ],
-  "commit": "1086895ce00c50e57fcdf7f1b2c5339b47536ff6"
+  "commit": "e0211c53c13734cc64c42e98bf1a8ee860707e13"
 }
