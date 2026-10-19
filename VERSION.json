@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.23.4",
-  "updated": "2026-10-16T04:53:28Z",
+  "version": "v2.23.5",
+  "updated": "2026-10-19T14:45:05Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "chore: update contact email to contact@vocalink-team.com",
     "Update sitemap.html",
     "style: align sitemap CSS declarations and indentation",
     "style: format sitemap HTML and CSS for readability",
@@ -26,8 +27,7 @@
     "fix: bind digital signature to signed PDF hash",
     "feat: strengthen pricing and project case study",
     "fix: synchronize page versions during auto-version bump",
-    "chore: final version sync v2.19.10",
-    "chore: sync displayed version to v2.19.9"
+    "chore: final version sync v2.19.10"
   ],
-  "commit": "cd41d232e017d86aa3e16daa5b5978b28161569b"
+  "commit": "1c18aa8aef216ca4d2e45aa7a999f4bd1308070a"
 }
