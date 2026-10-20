@@ -1,0 +1,42 @@
+name: VL-0001 Browser Preview Bundle
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.html'
+      - '**/*.css'
+      - '**/*.js'
+      - 'VERSION.json'
+      - '.github/workflows/vl-browser-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out pull request code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Package static site for local browser review
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p preview-site
+          tar --exclude='./.git' --exclude='./.github' --exclude='./preview-site' -cf - . | tar -xf - -C preview-site
+          test -f preview-site/index.html
+          test -f preview-site/vl-ui.css
+          test -f preview-site/request.html
+          test -f preview-site/recruit.html
+          test -f preview-site/VERSION.json
+      - name: Upload browser preview
+        uses: actions/upload-artifact@v4
+        with:
+          name: vl-0001-browser-preview
+          path: preview-site/
+          retention-days: 7
+          if-no-files-found: error
