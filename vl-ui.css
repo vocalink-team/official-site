@@ -1,0 +1,48 @@
+/* VL-0001 | Peach UI refresh | v2.24.0
+   Presentation-only layer: existing form handlers and application logic remain unchanged. */
+:root{--vl-peach:#f3d5c6;--vl-cream:#fff8f3;--vl-ink:#251713;--vl-muted:#78594d;--vl-accent:#a4492e;--vl-line:#ecd9ce;--vl-shadow:0 22px 55px rgba(97,55,36,.12)}
+html{scroll-padding-top:112px}
+body.vl-ui{--bg:#fff8f3;--panel:#fffaf6;--panel2:#fff3eb;--text:#251713;--muted:#78594d;--line:#ecd9ce;--accent:#a4492e;--green:#8c6858;background:radial-gradient(ellipse at 10% 2%,#f1cbbb 0,transparent 48%),linear-gradient(135deg,#f4d8c9 0%,#fff8f3 55%,#f7e6dc 100%);color:var(--vl-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Noto Sans JP",sans-serif;line-height:1.75}
+body.vl-ui a{color:inherit}
+body.vl-ui :is(a,button,input,select,textarea):focus-visible{outline:3px solid #a4492e;outline-offset:3px}
+body.vl-ui header{background:transparent!important;border-bottom:0!important;backdrop-filter:none!important;position:relative;z-index:10}
+body.vl-ui header :is(nav,.wrap){max-width:100%}
+body.vl-ui header nav{min-height:110px;height:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+body.vl-ui header .logo,body.vl-ui header a:first-child:not(.back){display:inline-flex;align-items:center;background:rgba(255,250,247,.9);padding:12px 22px;border-radius:999px;color:var(--vl-ink);font-size:clamp(18px,2.1vw,30px);font-weight:850;letter-spacing:-.035em;text-decoration:none}
+body.vl-ui header .logo span,body.vl-ui header a:first-child span{color:var(--vl-accent)}
+body.vl-ui header .links{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+body.vl-ui header .links a,body.vl-ui header a:last-child:not(.logo){background:rgba(255,250,247,.9);border:1px solid rgba(255,255,255,.55);padding:10px 15px;border-radius:999px;color:#644c42;font-weight:700;font-size:12px;letter-spacing:0}
+body.vl-ui .hero{padding:35px 0 85px;min-height:0;background:none!important}
+body.vl-ui .hero-grid{opacity:.08;pointer-events:none}
+body.vl-ui .hero .wrap{width:min(1400px,calc(100% - 48px))}
+body.vl-ui .hero-inner{background:rgba(255,250,247,.92);border:1px solid rgba(255,255,255,.85);border-radius:42px;padding:clamp(45px,7vw,100px) clamp(28px,6vw,85px);box-shadow:var(--vl-shadow);position:relative;z-index:1}
+body.vl-ui .hero h1{color:var(--vl-ink);font-size:clamp(48px,8vw,112px);line-height:1.04;letter-spacing:-.065em}
+body.vl-ui .hero :is(p,.lead,.eyebrow){color:var(--vl-muted)}
+body.vl-ui section:not(.hero){scroll-margin-top:28px}
+body.vl-ui :is(h1,h2,h3){color:var(--vl-ink)}
+body.vl-ui :is(.eyebrow,.kicker){color:var(--vl-accent)}
+body.vl-ui :is(.service,.work,.policy,.contact,.form,.trust>div,.overall,.item,.card,.panel){border-color:var(--vl-line)!important;background:rgba(255,250,247,.88)!important;border-radius:26px;box-shadow:0 10px 28px rgba(97,55,36,.055)}
+body.vl-ui .contact:after{color:rgba(164,73,46,.07)}
+body.vl-ui :is(.service,.work,.policy,.contact,.form,.overall){color:var(--vl-ink)}
+body.vl-ui :is(.lead,.intro,.step-lead,p,li){color:var(--vl-muted)}
+body.vl-ui :is(.btn,button[type=submit],.button,.cta){border-radius:999px}
+body.vl-ui :is(input,select,textarea){background:#fffdfa;color:var(--vl-ink);border:1px solid #d9bfb0;border-radius:14px}
+body.vl-ui :is(input,select,textarea)::placeholder{color:#8d766b}
+body.vl-ui :is(.btn,button[type=submit]){background:var(--vl-accent);color:#fff;border:0}
+body.vl-ui :is(.ok,.err,.error){border-radius:16px}
+body.vl-ui footer{border-color:var(--vl-line);color:var(--vl-muted)}
+body.vl-ui main>.wrap{max-width:1050px}
+body.vl-ui main h1{line-height:1.15;overflow-wrap:anywhere}
+body.vl-ui main h2{color:var(--vl-accent)}
+body.vl-ui main .wrap>p,body.vl-ui main .wrap>ol,body.vl-ui main .wrap>.item{max-width:900px}
+body.vl-ui .label{color:var(--vl-muted)}
+body.vl-ui .value{color:var(--vl-ink)}
+body.vl-ui .loader{background:var(--vl-cream)}
+body.vl-ui .loader :is(.loader-title,.loader-percent){color:var(--vl-ink)}
+body.vl-ui .loader-top,body.vl-ui .loader-meta{color:var(--vl-muted)}
+body.vl-ui .loader-bar{background:#e5c8b8}
+body.vl-ui .loader-progress{background:var(--vl-accent)}
+@media(max-width:1000px){body.vl-ui header nav{align-items:flex-start;flex-direction:column;padding:24px 0;gap:14px}body.vl-ui header .links{justify-content:flex-start;gap:7px}body.vl-ui header .links a{font-size:11px;padding:8px 12px}body.vl-ui .hero-inner{border-radius:30px}}
+@media(max-width:820px){body.vl-ui header .links{display:flex!important}body.vl-ui .hero-inner{display:block}body.vl-ui .hero .wrap{width:calc(100% - 28px)}body.vl-ui .hero{padding:12px 0 45px}body.vl-ui section:not(.hero){padding-top:65px;padding-bottom:65px}}
+@media(max-width:600px){body.vl-ui header .logo{font-size:19px}body.vl-ui .hero-inner{padding:46px 22px;border-radius:25px}body.vl-ui .hero h1{font-size:clamp(43px,12vw,70px)}body.vl-ui main h1{font-size:clamp(32px,9vw,52px)}body.vl-ui .contact{padding:30px 22px}}
+@media(prefers-reduced-motion:reduce){body.vl-ui *,body.vl-ui *::before,body.vl-ui *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
