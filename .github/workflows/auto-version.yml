@@ -31,7 +31,7 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
           SUBJECT=$(printf '%s' "$COMMIT_MESSAGE" | head -n 1)
           # A release already versioned in its PR must not be bumped again on merge.
-          if printf '%s' "$SUBJECT" | grep -Eq '\\(v[0-9]+\\.[0-9]+\\.[0-9]+\\)'; then
+          if printf '%s' "$SUBJECT" | grep -Eq 'v[0-9]+\.[0-9]+\.[0-9]+'; then
             echo 'Versioned PR merge; keep VERSION.json unchanged.'
             exit 0
           fi
