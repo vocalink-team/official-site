@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.7",
-  "updated": "2026-10-20T01:55:51.401Z",
+  "version": "v2.24.8",
+  "updated": "2026-10-20T02:04:01.469Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: synchronize official site page version metadata and CSS/JS cache keys",
     "fix: align SERVICE card top edges and equalize heights",
     "fix: add explicit GitHub Pages deploy workflow and prevent version double bump",
     "fix: unify ABOUT nav and improve contrast (v2.24.4)",
@@ -26,8 +27,7 @@
     "security: validate VocalinkSign manifest content integrity during offline verification",
     "security: validate signed manifest content integrity",
     "security: make signature audit transitions atomic and clean failed request artifacts",
-    "fix: clean failed signature request artifacts",
-    "security: make signature request lifecycle atomic and monitor cleanup failures"
+    "fix: clean failed signature request artifacts"
   ],
-  "commit": "07ee8bb8def9b69af6ec67df859e16485b2857be"
+  "commit": "b77b72bacd4ad853b027be36ada4139f310efa02"
 }
