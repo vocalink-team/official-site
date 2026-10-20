@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.3",
-  "updated": "2026-10-20T01:37:07Z",
+  "version": "v2.24.4",
+  "updated": "2026-10-20T01:44:49.512Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: normalize ABOUT nav pill and improve about-section contrast",
     "Merge PR #2: VL-0001 UI refresh (v2.24.2)",
     "fix: prevent auto-version from double bumping versioned PR merges",
     "chore: add PR browser preview artifact and safe review guide",
@@ -26,8 +27,7 @@
     "security: make signature request lifecycle atomic and monitor cleanup failures",
     "security: isolate signature finalizer and clean orphaned signature artifacts",
     "security: make signature finalization atomic and restrict resend state",
-    "security: bind signature to verified auth identity",
-    "fix: bind digital signature to signed PDF hash"
+    "security: bind signature to verified auth identity"
   ],
-  "commit": "b742ae3a38522456b40df3ff368726d881350c98"
+  "commit": "d5f0db0a7e4d518ecf0303a57c51e3a274763170"
 }
