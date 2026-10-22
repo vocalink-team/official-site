@@ -63,3 +63,24 @@ jobs:
           test "$status" = 400
 
           echo 'Extended negative tests passed'
+          # Reject requests that omit Origin entirely.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/no-origin.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' -X POST "$ENDPOINT" -d "$payload")
+          echo "missing origin: HTTP $status"
+          test "$status" = 403
+
+          # Reject missing required consent before reaching Turnstile.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/consent.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" -d '{"name":"Test","email":"test@example.invalid","role":"その他","motivation":"Test","consent":false,"turnstile_token":"invalid"}')
+          echo "missing consent: HTTP $status"
+          test "$status" = 400
+
+          # Confirm the server enforces the declared maximum request size.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/size.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" --data-binary @<(printf '%17000s' ' '))
+          echo "oversized body: HTTP $status"
+          test "$status" = 413
+
+          echo 'Additional boundary tests passed'
