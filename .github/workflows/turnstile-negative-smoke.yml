@@ -5,6 +5,11 @@ on:
       - test/turnstile-browser-smoke-20261023
     paths:
       - .github/workflows/turnstile-negative-smoke.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/turnstile-negative-smoke.yml
   workflow_dispatch:
 jobs:
   negative-tests:
