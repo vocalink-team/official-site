@@ -42,3 +42,24 @@ jobs:
             fi
           done
           echo 'Both negative tests passed'
+          # Confirm disallowed origins cannot submit, even with a token.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/origin.json -w '%{http_code}' \
+            -H 'Origin: https://attacker.invalid' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" -d "$payload")
+          echo "disallowed origin: HTTP $status"
+          test "$status" = 403
+
+          # Confirm unsupported methods are rejected.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/method.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -X GET "$ENDPOINT")
+          echo "GET method: HTTP $status"
+          test "$status" = 405
+
+          # Confirm malformed JSON is rejected before any insertion.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/json.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" -d '{broken-json')
+          echo "malformed JSON: HTTP $status"
+          test "$status" = 400
+
+          echo 'Extended negative tests passed'
