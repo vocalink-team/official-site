@@ -1,0 +1,39 @@
+name: Turnstile API negative smoke test
+on:
+  push:
+    branches:
+      - test/turnstile-browser-smoke-20261023
+    paths:
+      - .github/workflows/turnstile-negative-smoke.yml
+  workflow_dispatch:
+jobs:
+  negative-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reject missing and invalid tokens without creating applications
+        shell: bash
+        env:
+          ENDPOINT: https://qvxoxrzvxyyribqjnpkb.supabase.co/functions/v1/submit-team-application-secure
+        run: |
+          set -euo pipefail
+          payload='{"name":"Negative API test","email":"negative-test@example.invalid","role":"その他","motivation":"No database insertion expected","consent":true}'
+          for case in missing invalid; do
+            if [[ "$case" == invalid ]]; then
+              body='{"name":"Negative API test","email":"negative-test@example.invalid","role":"その他","motivation":"No database insertion expected","consent":true,"turnstile_token":"invalid-test-token"}'
+            else
+              body="$payload"
+            fi
+            status=$(curl --fail-with-body --silent --show-error --max-time 15 -o /tmp/response.json -w '%{http_code}' \
+              -H 'Origin: https://vocalink-team.github.io' \
+              -H 'Content-Type: application/json' \
+              -X POST "$ENDPOINT" -d "$body") || {
+                code=$?
+                if [[ "$code" != 22 ]]; then echo "Network/API error"; exit "$code"; fi
+              }
+            echo "$case token: HTTP $status"
+            if [[ "$status" != 403 ]]; then
+              echo "Expected 403"; cat /tmp/response.json; exit 1
+            fi
+          done
+          echo 'Both negative tests passed'
