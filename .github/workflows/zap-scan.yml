@@ -1,0 +1,17 @@
+name: OWASP ZAP Scan
+on: [push] # コードがプッシュされたら自動実行
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Scan the webapplication
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ここで自作サイトを一度起動するステップを挟む（例: npm start など）
+
+      - name: OWASP ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: 'http://localhost:3000' # 起動したローカルURLを指定
