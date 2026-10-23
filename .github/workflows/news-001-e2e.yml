@@ -1,0 +1,97 @@
+name: NEWS-001 Browser E2E
+on:
+  pull_request:
+    paths:
+      - 'news.html'
+      - 'news-detail.html'
+      - 'news-admin.html'
+      - 'news-public.js'
+      - 'supabase/functions/news-public-media/index.ts'
+      - 'tests/news-001.spec.mjs'
+      - '.github/workflows/news-001-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playwright-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright test runner
+        run: npm install --no-save --no-package-lock @playwright/test@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/news-001-server.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8765/news.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Browser E2E (mock Supabase)
+        run: npx playwright test tests/news-001.spec.mjs --browser=chromium --reporter=line
+      - name: Upload E2E failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-001-e2e-failures
+          path: test-results/
+          if-no-files-found: ignore
+
+  edge-public-deny:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm anonymous public gateway denies invalid and nonexistent media
+        shell: bash
+        run: |
+          set -euo pipefail
+          endpoint="https://qvxoxrzvxyyribqjnpkb.supabase.co/functions/v1/news-public-media"
+          for query in "article=invalid" "id=11111111-1111-4111-8111-111111111111" "article=11111111-1111-4111-8111-111111111111"; do
+            code=$(curl --retry 2 --retry-delay 2 --max-time 20 -sS -D /tmp/news-media-headers -o /tmp/news-media-body -w '%{http_code}' "$endpoint?$query")
+            echo "Gateway negative test: $query -> HTTP $code"
+            if [ "$code" != "404" ]; then
+              echo "::error::Expected HTTP 404 for inaccessible media, got $code"
+              cat /tmp/news-media-body
+              exit 1
+            fi
+            grep -qi '^cache-control: no-store' /tmp/news-media-headers
+            grep -qi '^x-content-type-options: nosniff' /tmp/news-media-headers
+            grep -qi '^access-control-allow-origin: \*' /tmp/news-media-headers
+          done
+
+  live-anon-rest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm anonymous REST can only read publicly visible NEWS
+        shell: bash
+        env:
+          NEWS_SUPABASE_KEY: sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe
+        run: |
+          set -euo pipefail
+          api="https://qvxoxrzvxyyribqjnpkb.supabase.co/rest/v1"
+          code=$(curl --retry 2 --max-time 20 -sS -o /tmp/news-articles.json -w '%{http_code}' -H "apikey: $NEWS_SUPABASE_KEY" "$api/news_articles?select=id,status,published_at,deleted_at&limit=100")
+          test "$code" = "200" || { echo "::error::Anon article SELECT failed: HTTP $code"; exit 1; }
+          python3 - <<'PY'
+          import json, datetime
+          rows=json.load(open('/tmp/news-articles.json'))
+          assert isinstance(rows,list)
+          now=datetime.datetime.now(datetime.timezone.utc)
+          for row in rows:
+              assert row['status']=='published'
+              assert row['deleted_at'] is None
+              assert datetime.datetime.fromisoformat(row['published_at'].replace('Z','+00:00'))<=now
+          print('Anonymous article visibility checks passed:',len(rows),'rows')
+          PY
+          code=$(curl --retry 2 --max-time 20 -sS -o /tmp/news-media.json -w '%{http_code}' -H "apikey: $NEWS_SUPABASE_KEY" "$api/news_media?select=id&limit=1")
+          if [ "$code" != "401" ] && [ "$code" != "403" ]; then
+            echo "::error::Anonymous media table must deny access, got HTTP $code"
+            exit 1
+          fi
+          echo "Anonymous media table denied as expected: HTTP $code"

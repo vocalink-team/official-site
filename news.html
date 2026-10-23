@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="version" content="2.25.0">
+<meta name="description" content="VOCALINK-TEAMのお知らせ・最新情報"><title>NEWS | VOCALINK-TEAM</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Noto Sans JP",sans-serif;background:#10100f;color:#eeeae2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 5%,#343027,transparent 40%),#10100f}
+a{color:inherit}.wrap{width:min(1040px,calc(100% - 32px));margin:auto}
+header{border-bottom:1px solid #49453f;padding:20px 0}.top{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}.brand{font-weight:800;text-decoration:none;font-size:20px}.brand span{color:#b9a78f}
+nav{display:flex;gap:18px;font-size:14px}main{padding:55px 0 100px}h1{font-size:clamp(36px,7vw,68px);letter-spacing:-.04em;margin:0}h2{font-size:22px;margin:12px 0}p{line-height:1.75}
+.lead{color:#bdb6ac;margin-bottom:32px}.filters{display:grid;grid-template-columns:2fr 1fr auto;gap:10px;margin-bottom:26px;align-items:end}
+label{display:block;font-size:13px;color:#cfc8bc;margin-bottom:5px}input,select,button{font:inherit;padding:11px;border-radius:9px;border:1px solid #5a554c;background:#22211e;color:#f7f4ee;min-height:44px}input,select{width:100%}button{cursor:pointer}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #e5a76c;outline-offset:3px}
+.news-list{display:grid;gap:16px}.news-card{border:1px solid #454039;background:#1c1b18;border-radius:16px;padding:24px;overflow-wrap:anywhere}.news-card a{text-decoration:none}.news-card a:hover{text-decoration:underline}
+.news-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;color:#c5bdb1}.pin{background:#8b6e44;color:#fff;padding:4px 9px;border-radius:99px}.news-card p{color:#c5bdb1;margin-bottom:0}
+.pagination{display:flex;justify-content:space-between;gap:12px;margin-top:24px}.muted{color:#c5bdb1}footer{border-top:1px solid #454039;padding:28px 0;color:#c5bdb1;font-size:13px}
+@media(max-width:650px){.filters{grid-template-columns:1fr}.news-card{padding:18px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style></head><body><header><div class="wrap top"><a class="brand" href="index.html">VOCALINK<span>-TEAM</span></a><nav aria-label="主要ナビゲーション"><a href="index.html">HOME</a><a href="news.html" aria-current="page">NEWS</a><a href="status.html">STATUS</a></nav></div></header>
+<main class="wrap"><div class="muted">VOCALINK-TEAM / INFORMATION</div><h1>NEWS.</h1><p class="lead">運営からのお知らせ・最新情報をお届けします。</p>
+<form id="searchForm" class="filters" role="search"><div><label for="keyword">キーワード</label><input id="keyword" type="search" maxlength="60" placeholder="タイトル・概要を検索"></div><div><label for="category">カテゴリ</label><select id="category"><option value="">すべて</option></select></div><button type="submit">検索</button></form>
+<p id="resultStatus" role="status" aria-live="polite" class="muted">お知らせを読み込んでいます…</p><div id="newsList" class="news-list"></div>
+<div class="pagination"><button type="button" id="previous" disabled>前のページ</button><span id="pageLabel" class="muted"></span><button type="button" id="next" disabled>次のページ</button></div>
+</main><footer><div class="wrap">© 2026 VOCALINK-TEAM · <a href="index.html">トップページへ</a></div></footer>
+<script type="module">
+import {sb,articleCard} from './news-public.js?v=2.25.0';
+const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);
+const perPage=12,categories=new Map();let page=Math.max(1,Math.min(10000,Number(params.get('page'))||1)),total=0;
+$('keyword').value=(params.get('q')||'').slice(0,60);
+async function loadCategories(){
+ const {data,error}=await sb.from('news_categories').select('id,name').eq('is_active',true).order('sort_order',{ascending:true});
+ if(error)return;
+ for(const c of data||[]){categories.set(c.id,c.name);$('category').append(new Option(c.name,c.id))}
+ const value=params.get('category')||'';if(categories.has(value))$('category').value=value;
+}
+function safeQuery(q){return q.replace(/[^\p{L}\p{N}\sー-]/gu,'').trim().slice(0,60)}
+async function loadNews(){
+ const raw=$('keyword').value.trim(),q=safeQuery(raw),category=$('category').value;
+ let query=sb.from('news_articles').select('id,title,slug,excerpt,category_id,is_pinned,published_at',{count:'exact'})
+ .eq('status','published').is('deleted_at',null).lte('published_at',new Date().toISOString());
+ if(category)query=query.eq('category_id',category);
+ if(q)query=query.or('title.ilike.%'+q+'%,excerpt.ilike.%'+q+'%');
+ query=query.order('is_pinned',{ascending:false}).order('published_at',{ascending:false}).range((page-1)*perPage,page*perPage-1);
+ const {data,error,count}=await query;
+ $('newsList').replaceChildren();
+ if(error){$('resultStatus').textContent='お知らせを取得できませんでした。時間をおいて再度お試しください。';$('previous').disabled=true;$('next').disabled=true;return}
+ total=count||0;const pages=Math.max(1,Math.ceil(total/perPage));
+ if(page>pages){page=pages;return loadNews()}
+ for(const a of data||[])$('newsList').append(articleCard(a,categories));
+ $('resultStatus').textContent=total?total+'件のお知らせが見つかりました。':'現在、該当するお知らせはありません。';
+ $('pageLabel').textContent=page+' / '+pages+' ページ';$('previous').disabled=page<=1;$('next').disabled=page>=pages;
+ const url=new URL(location.href);url.searchParams.delete('q');url.searchParams.delete('category');url.searchParams.delete('page');
+ if(q)url.searchParams.set('q',q);if(category)url.searchParams.set('category',category);if(page>1)url.searchParams.set('page',page);
+ history.replaceState(null,'',url);
+}
+$('searchForm').addEventListener('submit',e=>{e.preventDefault();page=1;void loadNews()});
+$('previous').onclick=()=>{if(page>1){page--;void loadNews()}};
+$('next').onclick=()=>{if(page*perPage<total){page++;void loadNews()}};
+await loadCategories();await loadNews();
+</script></body></html>

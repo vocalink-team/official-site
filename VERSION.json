@@ -1,13 +1,18 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.19",
-  "updated": "2026-10-23T09:33:30Z",
+  "version": "v2.25.4",
+  "updated": "2026-10-23T11:37:37.805Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: compare NEWS updated_at on save/archive to reject stale edits",
+    "fix: prevent NEWS in-flight editor switching and duplicate mutations; recover archive network errors",
+    "test: add opt-in real authentication and image lifecycle acceptance runner",
+    "test: expand NEWS XSS, failed-save recovery and JST scheduling coverage (mock E2E)",
+    "feat: NEWS-001 admin rich-text editor (draft branch, not yet deployed)",
     "fix: synchronize site versions and display update timestamps in JST",
     "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
     "fix: reconcile official site version metadata with recruitment page",
