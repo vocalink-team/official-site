@@ -1,6 +1,6 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.11",
+  "version": "v2.24.18",
   "updated": "2026-10-23T08:59:57Z",
   "versioning": {
     "major": "大規模変更",
@@ -8,6 +8,8 @@
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
+    "fix: reconcile official site version metadata with recruitment page",
     "fix: show safe API validation errors for iPad recruitment submissions (#5)",
     "Create zap-scan.yml",
     "fix: recover submit controls on request/recruit network exceptions",
