@@ -35,9 +35,12 @@ function query(table) {
   single(){return Promise.resolve(makeResult(true))},
   then(resolve,reject){return Promise.resolve(makeResult(false)).then(resolve,reject)}
  };
- function makeResult(single){
+ async function makeResult(single){
   const source=table==='news_articles'?articles:table==='news_categories'?categories:table==='news_article_revisions'?revisions:table==='news_audit_logs'?logs:media;
   if(state.write){
+   window.__writeAttempts=(window.__writeAttempts||0)+1;
+   if(window.__holdWrite)await new Promise(resolve=>window.__releaseWrite=resolve);
+   if(window.__throwWrite)throw new Error('TEST_NETWORK_FAILURE');
    if(new URL(location.href).searchParams.has('mockWriteError'))return {data:null,error:{message:'TEST_WRITE_DENIED'}};
    (window.__newsWrites ||= []).push({table,...state.write});
    const id=articles[0].id;
@@ -61,7 +64,11 @@ export function createClient(){
    async signInWithPassword(){return {error:null}},
    async signOut(){return {error:null}}
   },
-  storage:{from(){return {async upload(){return {error:null}},async createSignedUrl(){return {data:{signedUrl:'#'},error:null}}}}}
+  storage:{from(){return {async upload(path){
+    window.__uploadedPath=path;
+    if(window.__holdUpload)await new Promise(resolve=>window.__releaseUpload=resolve);
+    return {error:null}
+   },async createSignedUrl(){return {data:{signedUrl:'#'},error:null}}}}}
  };
 }
 `;
@@ -185,4 +192,73 @@ test('未保存記事への画像添付を止める', async ({page}) => {
  await expect(page.locator('#workspace')).toBeVisible();
  await page.getByRole('button',{name:'画像をアップロード',exact:true}).click();
  await expect(page.locator('#imageStatus')).toHaveText('先に記事を下書き保存してください');
+});
+
+test('保存待機中は編集切替と二重送信を止める', async ({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await expect(page.locator('#workspace')).toBeVisible();
+ await page.locator('#title').fill('遅延保存');
+ await page.locator('#slug').fill('delayed-save');
+ await page.locator('#editor').fill('保存中の本文');
+ await page.evaluate(()=>window.__holdWrite=true);
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>window.__writeAttempts)).toBe(1);
+ await expect(page.locator('#newArticle')).toBeDisabled();
+ await expect(page.locator('#articles button')).toBeDisabled();
+ await expect(page.locator('#title')).toBeDisabled();
+ await expect(page.locator('#editor')).toHaveAttribute('contenteditable','false');
+ await page.locator('#articleForm').evaluate(form=>form.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true})));
+ expect(await page.evaluate(()=>window.__writeAttempts)).toBe(1);
+ await page.evaluate(()=>window.__releaseWrite());
+ await expect(page.locator('#saveMessage')).toHaveText('下書きを保存しました');
+ await expect(page.locator('#newArticle')).toBeEnabled();
+ await expect(page.locator('#archiveBtn')).toBeEnabled();
+ await expect(page.locator('#editor')).toHaveAttribute('contenteditable','true');
+});
+
+test('保存通信例外の後も本文を保持して再試行できる', async ({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await expect(page.locator('#workspace')).toBeVisible();
+ await page.locator('#title').fill('通信断');
+ await page.locator('#slug').fill('network-failure');
+ await page.locator('#editor').fill('保持する本文');
+ await page.evaluate(()=>window.__throwWrite=true);
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect(page.locator('#saveMessage')).toContainText('TEST_NETWORK_FAILURE');
+ await expect(page.locator('#title')).toBeEnabled();
+ await expect(page.locator('#editor')).toHaveText('保持する本文');
+ await page.evaluate(()=>window.__throwWrite=false);
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect(page.locator('#saveMessage')).toHaveText('下書きを保存しました');
+});
+
+test('画像転送中は記事切替を止め同じ記事へ紐付ける', async ({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await page.getByRole('button',{name:'編集',exact:true}).click();
+ await page.locator('#imageUpload').setInputFiles({name:'test.png',mimeType:'image/png',buffer:Buffer.from([137,80,78,71])});
+ await page.evaluate(()=>window.__holdUpload=true);
+ await page.locator('#uploadImage').click();
+ await expect.poll(()=>page.evaluate(()=>typeof window.__releaseUpload)).toBe('function');
+ await expect(page.locator('#newArticle')).toBeDisabled();
+ await expect(page.locator('#articles button')).toBeDisabled();
+ await expect(page.getByRole('button',{name:'下書き保存',exact:true})).toBeDisabled();
+ await page.evaluate(()=>window.__releaseUpload());
+ await expect(page.locator('#imageStatus')).toContainText('画像を添付しました');
+ const result=await page.evaluate(()=>({path:window.__uploadedPath,write:window.__newsWrites.find(w=>w.table==='news_media')}));
+ expect(result.write.value.article_id).toBe('11111111-1111-4111-8111-111111111111');
+ expect(result.write.value.storage_path).toBe(result.path);
+ expect(result.path.startsWith(result.write.value.article_id+'/')).toBe(true);
+ await expect(page.locator('#newArticle')).toBeEnabled();
+});
+
+test('アーカイブ通信例外は入力を保持し操作を復旧する', async ({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await page.getByRole('button',{name:'編集',exact:true}).click();
+ await page.evaluate(()=>window.__throwWrite=true);
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#archiveBtn').click();
+ await expect(page.locator('#saveMessage')).toContainText('アーカイブに失敗しました: TEST_NETWORK_FAILURE');
+ await expect(page.locator('#title')).toHaveValue('公開済みのお知らせ');
+ await expect(page.locator('#archiveBtn')).toBeEnabled();
+ await expect(page.locator('#newArticle')).toBeEnabled();
 });
