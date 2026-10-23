@@ -32,10 +32,10 @@ button:focus-visible,input:focus-visible,select:focus-visible,[contenteditable]:
 <label id="editorLabel">本文（リッチテキスト）</label>
 <div class="toolbar" aria-label="書式ツールバー"><button type="button" data-command="bold" aria-label="太字"><b>B</b></button><button type="button" data-command="italic" aria-label="斜体"><i>I</i></button><button type="button" data-command="underline" aria-label="下線"><u>U</u></button><button type="button" data-command="insertUnorderedList">箇条書き</button><button type="button" data-command="insertOrderedList">番号付き</button><button type="button" id="linkBtn">リンク</button></div>
 <div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="editorLabel" spellcheck="true"></div>
-<p class="muted">貼り付けたHTMLは保存・プレビュー時に許可タグだけを残します。画像は別管理です。</p>
+<p class="muted">貼り付けたHTMLは保存・プレビュー時に許可タグだけを残します。画像は記事保存後に非公開Storageへ添付します。</p><label for="imageUpload">添付画像（JPEG / PNG / WebP、5MB以下）</label><input id="imageUpload" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" id="uploadImage">画像をアップロード</button><p id="imageStatus" class="muted" role="status" aria-live="polite"></p><div id="mediaList" class="list"></div>
 <div class="toolbar"><button type="button" id="previewBtn">プレビュー</button><button type="submit" data-mode="draft">下書き保存</button><button type="submit" data-mode="publish">公開・予約設定して保存</button><button type="button" id="archiveBtn" disabled>アーカイブ</button></div>
 </form><p id="saveMessage" role="status" aria-live="polite"></p></section>
-<section id="previewPanel" class="panel" hidden><h2>プレビュー（管理者のみ）</h2><div class="preview"><h2 id="previewTitle"></h2><div id="previewBody"></div></div></section>
+<section class="panel" id="historyPanel" hidden><h2>改訂履歴・操作ログ</h2><div class="grid"><div><h3>改訂履歴</h3><div id="revisionList" class="list"></div></div><div><h3>操作ログ</h3><div id="auditList" class="list"></div></div></div></section><section id="previewPanel" class="panel" hidden><h2>プレビュー（管理者のみ）</h2><div class="preview"><h2 id="previewTitle"></h2><div id="previewBody"></div></div></section>
 </main></div>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
@@ -65,8 +65,8 @@ function safeHtml(input){
 function message(text,error=false){$('saveMessage').textContent=text;$('saveMessage').className=error?'error':'success'}
 function dateLocal(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const fmt=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});return fmt.format(d).replace(' ','T')}
 function localToIso(value){if(!value)return null;const d=new Date(value+':00+09:00');if(Number.isNaN(d.getTime()))throw Error('公開日時が不正です');return d.toISOString()}
-function clearForm(){$('articleForm').reset();$('editor').replaceChildren();currentId=null;$('formHeading').textContent='新規記事';$('archiveBtn').disabled=true;message('');$('previewPanel').hidden=true}
-function populate(a){currentId=a.id;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');$('articleForm').scrollIntoView({behavior:'smooth'})}
+function clearForm(){$('articleForm').reset();$('editor').replaceChildren();currentId=null;$('formHeading').textContent='新規記事';$('archiveBtn').disabled=true;message('');$('previewPanel').hidden=true;$('historyPanel').hidden=true;$('mediaList').replaceChildren();$('imageStatus').textContent=''}
+function populate(a){currentId=a.id;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');void Promise.all([loadHistory(),loadMedia()]);$('articleForm').scrollIntoView({behavior:'smooth'})}
 async function refresh(){
  const {data,error}=await sb.from('news_articles').select('id,title,slug,status,published_at,scheduled_at,is_pinned,category_id,excerpt,body_json,deleted_at').is('deleted_at',null).order('created_at',{ascending:false}).limit(100);
  if(error){$('articles').textContent='一覧取得エラー: '+error.message;return}
@@ -110,12 +110,57 @@ $('articleForm').addEventListener('submit',async e=>{
  try{
   const result=currentId?await sb.from('news_articles').update(payload).eq('id',currentId).select('id').single():await sb.from('news_articles').insert({...payload,created_by:currentUser.id}).select('id').single();
   if(result.error)throw result.error;
-  currentId=result.data.id;$('archiveBtn').disabled=false;
+  currentId=result.data.id;$('archiveBtn').disabled=false;await Promise.all([loadHistory(),loadMedia()]);
   message(mode==='draft'?'下書きを保存しました':scheduled?'予約投稿を保存しました':'記事を公開状態で保存しました');
   await refresh();
  }catch(err){message('保存に失敗しました: '+(err.message||'不明なエラー'),true)}
  finally{buttons.forEach(b=>b.disabled=false)}
 });
+async function loadHistory(){
+ if(!currentId)return;
+ const [revisions,logs]=await Promise.all([
+  sb.from('news_article_revisions').select('revision_no,edited_by,created_at').eq('article_id',currentId).order('revision_no',{ascending:false}).limit(30),
+  sb.from('news_audit_logs').select('action,actor_id,created_at').eq('article_id',currentId).order('created_at',{ascending:false}).limit(30)
+ ]);
+ $('historyPanel').hidden=false;
+ for(const [target,result,render] of [
+  ['revisionList',revisions,r=>'改訂 '+r.revision_no+' / '+new Date(r.created_at).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})],
+  ['auditList',logs,r=>r.action+' / '+new Date(r.created_at).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})]
+ ]){
+  $(target).replaceChildren();if(result.error){$(target).textContent='取得エラー: '+result.error.message;continue}
+  for(const row of result.data||[]){const div=document.createElement('div');div.className='item';div.textContent=render(row);$(target).append(div)}
+  if(!result.data?.length)$(target).textContent='履歴はありません';
+ }
+}
+async function loadMedia(){
+ if(!currentId)return;
+ const {data,error}=await sb.from('news_media').select('id,storage_path,mime_type,size_bytes').eq('article_id',currentId).order('created_at',{ascending:false});
+ $('mediaList').replaceChildren();if(error){$('imageStatus').textContent='画像一覧の取得に失敗しました: '+error.message;return}
+ for(const m of data||[]){
+  const div=document.createElement('div');div.className='item';const name=document.createElement('span');name.textContent=m.storage_path.split('/').pop()+' / '+Math.ceil(m.size_bytes/1024)+' KB';
+  const btn=document.createElement('button');btn.type='button';btn.textContent='管理者プレビュー';btn.onclick=async()=>{
+   const {data:link,error:err}=await sb.storage.from('news-images').createSignedUrl(m.storage_path,60);
+   if(err){$('imageStatus').textContent='画像表示エラー: '+err.message;return}
+   const a=document.createElement('a');a.href=link.signedUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='60秒間有効な画像を開く';div.querySelector('a')?.remove();div.append(a);
+  };div.append(name,btn);$('mediaList').append(div)
+ }
+ if(!data?.length)$('mediaList').textContent='添付画像はありません';
+}
+$('uploadImage').onclick=async()=>{
+ if(!currentId){$('imageStatus').textContent='先に記事を下書き保存してください';return}
+ const file=$('imageUpload').files?.[0];if(!file){$('imageStatus').textContent='画像を選択してください';return}
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<1||file.size>5242880){$('imageStatus').textContent='JPEG・PNG・WebP、5MB以下の画像のみアップロードできます';return}
+ const extension={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
+ const path=currentId+'/'+crypto.randomUUID()+'.'+extension;
+ $('uploadImage').disabled=true;$('imageStatus').textContent='アップロード中…';
+ try{
+  const {error:uploadError}=await sb.storage.from('news-images').upload(path,file,{contentType:file.type,upsert:false});if(uploadError)throw uploadError;
+  const {error:dbError}=await sb.from('news_media').insert({article_id:currentId,storage_path:path,mime_type:file.type,size_bytes:file.size});
+  if(dbError){await sb.storage.from('news-images').remove([path]);throw dbError}
+  $('imageStatus').textContent='画像を添付しました。一般公開用の画像配信は未実装です。';$('imageUpload').value='';await loadMedia();
+ }catch(err){$('imageStatus').textContent='アップロード失敗: '+(err.message||'不明なエラー')}
+ finally{$('uploadImage').disabled=false}
+};
 $('archiveBtn').onclick=async()=>{if(!currentId||!confirm('この記事をアーカイブしますか？'))return;const {error}=await sb.from('news_articles').update({status:'archived',deleted_at:new Date().toISOString(),updated_by:currentUser.id}).eq('id',currentId);if(error){message(error.message,true);return}clearForm();await refresh()};
 sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;$('workspace').hidden=true;$('login').hidden=false}});
 await checkAuth();
