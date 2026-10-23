@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.25.3",
-  "updated": "2026-10-23T11:15:56.296Z",
+  "version": "v2.25.4",
+  "updated": "2026-10-23T11:37:37.805Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: compare NEWS updated_at on save/archive to reject stale edits",
     "fix: prevent NEWS in-flight editor switching and duplicate mutations; recover archive network errors",
     "test: add opt-in real authentication and image lifecycle acceptance runner",
     "test: expand NEWS XSS, failed-save recovery and JST scheduling coverage (mock E2E)",
