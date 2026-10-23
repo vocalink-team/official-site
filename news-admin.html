@@ -41,7 +41,15 @@ button:focus-visible,input:focus-visible,select:focus-visible,[contenteditable]:
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const sb=createClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe');
 const $=id=>document.getElementById(id);
-let currentUser=null,currentId=null,articles=[];
+let currentUser=null,currentId=null,articles=[],busy=false;
+function setBusy(value){
+ busy=value;
+ $('workspace').setAttribute('aria-busy',String(value));
+ $('workspace').querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=value);
+ $('editor').contentEditable=String(!value);
+ $('archiveBtn').disabled=value||!currentId;
+}
+
 const allowed=new Set(['P','DIV','BR','STRONG','B','EM','I','U','UL','OL','LI','H2','H3','BLOCKQUOTE','A']);
 function safeHtml(input){
  const parsed=new DOMParser().parseFromString('<div>'+String(input||'')+'</div>','text/html');
@@ -66,13 +74,13 @@ function message(text,error=false){$('saveMessage').textContent=text;$('saveMess
 function dateLocal(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const fmt=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});return fmt.format(d).replace(' ','T')}
 function localToIso(value){if(!value)return null;const d=new Date(value+':00+09:00');if(Number.isNaN(d.getTime()))throw Error('公開日時が不正です');return d.toISOString()}
 function clearForm(){$('articleForm').reset();$('editor').replaceChildren();currentId=null;$('formHeading').textContent='新規記事';$('archiveBtn').disabled=true;message('');$('previewPanel').hidden=true;$('historyPanel').hidden=true;$('mediaList').replaceChildren();$('imageStatus').textContent=''}
-function populate(a){currentId=a.id;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');void Promise.all([loadHistory(),loadMedia()]);$('articleForm').scrollIntoView({behavior:'smooth'})}
+function populate(a){if(busy)return;currentId=a.id;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');void Promise.all([loadHistory(),loadMedia()]);$('articleForm').scrollIntoView({behavior:'smooth'})}
 async function refresh(){
  const {data,error}=await sb.from('news_articles').select('id,title,slug,status,published_at,scheduled_at,is_pinned,category_id,excerpt,body_json,deleted_at').is('deleted_at',null).order('created_at',{ascending:false}).limit(100);
  if(error){$('articles').textContent='一覧取得エラー: '+error.message;return}
  articles=data||[];$('articles').replaceChildren();
  if(!articles.length){$('articles').textContent='記事はありません';return}
- for(const a of articles){const item=document.createElement('div');item.className='item';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=a.title;const meta=document.createElement('small');meta.textContent=a.status+' / '+(a.published_at?dateLocal(a.published_at):'未公開')+(a.is_pinned?' / 重要':'');info.append(title,meta);const btn=document.createElement('button');btn.type='button';btn.textContent='編集';btn.onclick=()=>populate(a);item.append(info,btn);$('articles').append(item)}
+ for(const a of articles){const item=document.createElement('div');item.className='item';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=a.title;const meta=document.createElement('small');meta.textContent=a.status+' / '+(a.published_at?dateLocal(a.published_at):'未公開')+(a.is_pinned?' / 重要':'');info.append(title,meta);const btn=document.createElement('button');btn.type='button';btn.textContent='編集';btn.disabled=busy;btn.onclick=()=>populate(a);item.append(info,btn);$('articles').append(item)}
 }
 async function loadCategories(){
  const {data,error}=await sb.from('news_categories').select('id,name').order('sort_order');
@@ -90,13 +98,13 @@ async function checkAuth(){
 }
 $('loginForm').addEventListener('submit',async e=>{e.preventDefault();const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){$('status').textContent='ログインに失敗しました';return}await checkAuth()});
 $('logout').onclick=async()=>{await sb.auth.signOut();currentUser=null;location.reload()};
-$('reload').onclick=refresh;$('newArticle').onclick=clearForm;
+$('reload').onclick=refresh;$('newArticle').onclick=()=>{if(!busy)clearForm()};
 document.querySelectorAll('[data-command]').forEach(btn=>btn.addEventListener('click',()=>{$('editor').focus();document.execCommand(btn.dataset.command,false,null)}));
 $('linkBtn').onclick=()=>{const url=prompt('https:// で始まるリンク先URL');if(!url)return;try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error();$('editor').focus();document.execCommand('createLink',false,u.href)}catch{message('http/httpsのURLのみ指定できます',true)}};
 $('editor').addEventListener('paste',e=>{e.preventDefault();const text=e.clipboardData?.getData('text/plain')||'';document.execCommand('insertText',false,text)});
 $('previewBtn').onclick=()=>{$('previewTitle').textContent=$('title').value||'無題';$('previewBody').innerHTML=safeHtml($('editor').innerHTML);$('previewPanel').hidden=false;$('previewPanel').scrollIntoView({behavior:'smooth'})};
 $('articleForm').addEventListener('submit',async e=>{
- e.preventDefault();if(!currentUser)return;
+ e.preventDefault();if(!currentUser||busy)return;
  const mode=e.submitter?.dataset.mode||'draft';
  const title=$('title').value.trim(),slug=$('slug').value.trim();
  if(!title||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){message('タイトルとURL識別子を確認してください',true);return}
@@ -106,15 +114,15 @@ $('articleForm').addEventListener('submit',async e=>{
  if(mode==='publish'&&!when)when=new Date().toISOString();
  const now=new Date().toISOString(),scheduled=mode==='publish'&&new Date(when)>new Date();
  const payload={title,slug,excerpt:$('excerpt').value.trim(),body_json:{format:'safe-html-v1',html:clean},category_id:$('category').value||null,is_pinned:$('pinned').checked,status:mode==='draft'?'draft':'published',published_at:mode==='draft'?null:when,scheduled_at:scheduled?when:null,updated_by:currentUser.id,updated_at:now};
- const buttons=$('articleForm').querySelectorAll('button[type=submit]');buttons.forEach(b=>b.disabled=true);message('保存中…');
+ setBusy(true);message('保存中…');
  try{
   const result=currentId?await sb.from('news_articles').update(payload).eq('id',currentId).select('id').single():await sb.from('news_articles').insert({...payload,created_by:currentUser.id}).select('id').single();
   if(result.error)throw result.error;
-  currentId=result.data.id;$('archiveBtn').disabled=false;await Promise.all([loadHistory(),loadMedia()]);
+  currentId=result.data.id;await Promise.all([loadHistory(),loadMedia()]);
   message(mode==='draft'?'下書きを保存しました':scheduled?'予約投稿を保存しました':'記事を公開状態で保存しました');
   await refresh();
  }catch(err){message('保存に失敗しました: '+(err.message||'不明なエラー'),true)}
- finally{buttons.forEach(b=>b.disabled=false)}
+ finally{setBusy(false)}
 });
 async function loadHistory(){
  if(!currentId)return;
@@ -147,21 +155,33 @@ async function loadMedia(){
  if(!data?.length)$('mediaList').textContent='添付画像はありません';
 }
 $('uploadImage').onclick=async()=>{
+ if(busy||!currentUser)return;
  if(!currentId){$('imageStatus').textContent='先に記事を下書き保存してください';return}
  const file=$('imageUpload').files?.[0];if(!file){$('imageStatus').textContent='画像を選択してください';return}
  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<1||file.size>5242880){$('imageStatus').textContent='JPEG・PNG・WebP、5MB以下の画像のみアップロードできます';return}
  const extension={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
- const path=currentId+'/'+crypto.randomUUID()+'.'+extension;
- $('uploadImage').disabled=true;$('imageStatus').textContent='アップロード中…';
+ const articleId=currentId;
+ const path=articleId+'/'+crypto.randomUUID()+'.'+extension;
+ setBusy(true);$('imageStatus').textContent='アップロード中…';
  try{
   const {error:uploadError}=await sb.storage.from('news-images').upload(path,file,{contentType:file.type,upsert:false});if(uploadError)throw uploadError;
-  const {error:dbError}=await sb.from('news_media').insert({article_id:currentId,storage_path:path,mime_type:file.type,size_bytes:file.size});
+  const {error:dbError}=await sb.from('news_media').insert({article_id:articleId,storage_path:path,mime_type:file.type,size_bytes:file.size});
   if(dbError){await sb.storage.from('news-images').remove([path]);throw dbError}
   $('imageStatus').textContent='画像を添付しました。公開済み記事では画像が表示されます。公開前の記事の画像は非公開です。';$('imageUpload').value='';await loadMedia();
  }catch(err){$('imageStatus').textContent='アップロード失敗: '+(err.message||'不明なエラー')}
- finally{$('uploadImage').disabled=false}
+ finally{setBusy(false)}
 };
-$('archiveBtn').onclick=async()=>{if(!currentId||!confirm('この記事をアーカイブしますか？'))return;const {error}=await sb.from('news_articles').update({status:'archived',deleted_at:new Date().toISOString(),updated_by:currentUser.id}).eq('id',currentId);if(error){message(error.message,true);return}clearForm();await refresh()};
+$('archiveBtn').onclick=async()=>{
+ if(busy||!currentUser||!currentId||!confirm('この記事をアーカイブしますか？'))return;
+ const articleId=currentId,actorId=currentUser.id;
+ setBusy(true);
+ try{
+  const {error}=await sb.from('news_articles').update({status:'archived',deleted_at:new Date().toISOString(),updated_by:actorId}).eq('id',articleId).select('id').single();
+  if(error)throw error;
+  clearForm();await refresh();
+ }catch(err){message('アーカイブに失敗しました: '+(err.message||'不明なエラー'),true)}
+ finally{setBusy(false)}
+};
 sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;$('workspace').hidden=true;$('login').hidden=false}});
 await checkAuth();
 </script></body></html>
