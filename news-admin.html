@@ -41,7 +41,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[contenteditable]:
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const sb=createClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe');
 const $=id=>document.getElementById(id);
-let currentUser=null,currentId=null,articles=[],busy=false;
+let currentUser=null,currentId=null,articles=[],busy=false,currentUpdatedAt=null;
 function setBusy(value){
  busy=value;
  $('workspace').setAttribute('aria-busy',String(value));
@@ -70,13 +70,24 @@ function safeHtml(input){
  walk(parsed.body.firstElementChild,root);
  return root.innerHTML;
 }
+function nextUpdatedAt(){
+ const previous=currentUpdatedAt?Date.parse(currentUpdatedAt):0;
+ return new Date(Math.max(Date.now(),previous+1)).toISOString();
+}
+function assertEditableVersion(){
+ if(currentId&&(!currentUpdatedAt||!Number.isFinite(Date.parse(currentUpdatedAt))))throw Error('更新情報を取得できません。一覧更新から記事を開き直してください');
+}
+function assertWriteResult(result){
+ if(result.error)throw result.error;
+ if(!result.data)throw Error('記事が更新・削除されたか、編集権限が変更されました。入力内容を控え、一覧更新から記事を開き直してください');
+}
 function message(text,error=false){$('saveMessage').textContent=text;$('saveMessage').className=error?'error':'success'}
 function dateLocal(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const fmt=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});return fmt.format(d).replace(' ','T')}
 function localToIso(value){if(!value)return null;const d=new Date(value+':00+09:00');if(Number.isNaN(d.getTime()))throw Error('公開日時が不正です');return d.toISOString()}
-function clearForm(){$('articleForm').reset();$('editor').replaceChildren();currentId=null;$('formHeading').textContent='新規記事';$('archiveBtn').disabled=true;message('');$('previewPanel').hidden=true;$('historyPanel').hidden=true;$('mediaList').replaceChildren();$('imageStatus').textContent=''}
-function populate(a){if(busy)return;currentId=a.id;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');void Promise.all([loadHistory(),loadMedia()]);$('articleForm').scrollIntoView({behavior:'smooth'})}
+function clearForm(){$('articleForm').reset();$('editor').replaceChildren();currentId=null;currentUpdatedAt=null;$('formHeading').textContent='新規記事';$('archiveBtn').disabled=true;message('');$('previewPanel').hidden=true;$('historyPanel').hidden=true;$('mediaList').replaceChildren();$('imageStatus').textContent=''}
+function populate(a){if(busy)return;currentId=a.id;currentUpdatedAt=a.updated_at;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');void Promise.all([loadHistory(),loadMedia()]);$('articleForm').scrollIntoView({behavior:'smooth'})}
 async function refresh(){
- const {data,error}=await sb.from('news_articles').select('id,title,slug,status,published_at,scheduled_at,is_pinned,category_id,excerpt,body_json,deleted_at').is('deleted_at',null).order('created_at',{ascending:false}).limit(100);
+ const {data,error}=await sb.from('news_articles').select('id,title,slug,status,published_at,scheduled_at,is_pinned,category_id,excerpt,body_json,deleted_at,updated_at').is('deleted_at',null).order('created_at',{ascending:false}).limit(100);
  if(error){$('articles').textContent='一覧取得エラー: '+error.message;return}
  articles=data||[];$('articles').replaceChildren();
  if(!articles.length){$('articles').textContent='記事はありません';return}
@@ -112,13 +123,14 @@ $('articleForm').addEventListener('submit',async e=>{
  if(!clean.replace(/<[^>]*>/g,'').trim()){message('本文を入力してください',true);return}
  let when=null;try{when=localToIso($('publishAt').value)}catch(err){message(err.message,true);return}
  if(mode==='publish'&&!when)when=new Date().toISOString();
- const now=new Date().toISOString(),scheduled=mode==='publish'&&new Date(when)>new Date();
+ try{assertEditableVersion()}catch(err){message(err.message,true);return}
+ const now=nextUpdatedAt(),scheduled=mode==='publish'&&new Date(when)>new Date();
  const payload={title,slug,excerpt:$('excerpt').value.trim(),body_json:{format:'safe-html-v1',html:clean},category_id:$('category').value||null,is_pinned:$('pinned').checked,status:mode==='draft'?'draft':'published',published_at:mode==='draft'?null:when,scheduled_at:scheduled?when:null,updated_by:currentUser.id,updated_at:now};
  setBusy(true);message('保存中…');
  try{
-  const result=currentId?await sb.from('news_articles').update(payload).eq('id',currentId).select('id').single():await sb.from('news_articles').insert({...payload,created_by:currentUser.id}).select('id').single();
-  if(result.error)throw result.error;
-  currentId=result.data.id;await Promise.all([loadHistory(),loadMedia()]);
+  const result=currentId?await sb.from('news_articles').update(payload).eq('id',currentId).eq('updated_at',currentUpdatedAt).is('deleted_at',null).select('id,updated_at').maybeSingle():await sb.from('news_articles').insert({...payload,created_by:currentUser.id}).select('id,updated_at').single();
+  assertWriteResult(result);
+  currentId=result.data.id;currentUpdatedAt=result.data.updated_at;await Promise.all([loadHistory(),loadMedia()]);
   message(mode==='draft'?'下書きを保存しました':scheduled?'予約投稿を保存しました':'記事を公開状態で保存しました');
   await refresh();
  }catch(err){message('保存に失敗しました: '+(err.message||'不明なエラー'),true)}
@@ -176,8 +188,9 @@ $('archiveBtn').onclick=async()=>{
  const articleId=currentId,actorId=currentUser.id;
  setBusy(true);
  try{
-  const {error}=await sb.from('news_articles').update({status:'archived',deleted_at:new Date().toISOString(),updated_by:actorId}).eq('id',articleId).select('id').single();
-  if(error)throw error;
+  assertEditableVersion();
+  const result=await sb.from('news_articles').update({status:'archived',deleted_at:new Date().toISOString(),updated_by:actorId,updated_at:nextUpdatedAt()}).eq('id',articleId).eq('updated_at',currentUpdatedAt).is('deleted_at',null).select('id,updated_at').maybeSingle();
+  assertWriteResult(result);
   clearForm();await refresh();
  }catch(err){message('アーカイブに失敗しました: '+(err.message||'不明なエラー'),true)}
  finally{setBusy(false)}
