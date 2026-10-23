@@ -157,7 +157,7 @@ $('uploadImage').onclick=async()=>{
   const {error:uploadError}=await sb.storage.from('news-images').upload(path,file,{contentType:file.type,upsert:false});if(uploadError)throw uploadError;
   const {error:dbError}=await sb.from('news_media').insert({article_id:currentId,storage_path:path,mime_type:file.type,size_bytes:file.size});
   if(dbError){await sb.storage.from('news-images').remove([path]);throw dbError}
-  $('imageStatus').textContent='画像を添付しました。一般公開用の画像配信は未実装です。';$('imageUpload').value='';await loadMedia();
+  $('imageStatus').textContent='画像を添付しました。公開済み記事では画像が表示されます。公開前の記事の画像は非公開です。';$('imageUpload').value='';await loadMedia();
  }catch(err){$('imageStatus').textContent='アップロード失敗: '+(err.message||'不明なエラー')}
  finally{$('uploadImage').disabled=false}
 };
