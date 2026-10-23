@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.18",
-  "updated": "2026-10-23T08:59:57Z",
+  "version": "v2.24.19",
+  "updated": "2026-10-23T09:33:30Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: synchronize site versions and display update timestamps in JST",
     "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
     "fix: reconcile official site version metadata with recruitment page",
     "fix: show safe API validation errors for iPad recruitment submissions (#5)",
@@ -26,10 +27,7 @@
     "style: align sitemap CSS declarations and indentation",
     "style: format sitemap HTML and CSS for readability",
     "chore: remove services and security section from visitor sitemap",
-    "feat: add sitemap navigation in footer",
-    "feat: add public sitemap and discovery metadata",
-    "feat: verify VocalinkSign issuer signature for v2 manifests",
-    "security: validate VocalinkSign manifest content integrity during offline verification"
+    "feat: add sitemap navigation in footer"
   ],
-  "commit": "ab116bfc9872c135673d5d816864aa850d61a9a3"
+  "commit": "ac418d7c309478a34f36a9fde550c81f5542ba03"
 }
