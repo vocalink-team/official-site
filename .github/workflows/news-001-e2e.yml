@@ -1,0 +1,45 @@
+name: NEWS-001 Browser E2E
+on:
+  pull_request:
+    paths:
+      - 'news.html'
+      - 'news-detail.html'
+      - 'news-admin.html'
+      - 'news-public.js'
+      - 'tests/news-001.spec.mjs'
+      - '.github/workflows/news-001-e2e.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  playwright-news:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright test runner
+        run: npm install --no-save --no-package-lock @playwright/test@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Start local static site
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/news-001-server.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8765/news.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Browser E2E (mock Supabase)
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
+        run: npx playwright test tests/news-001.spec.mjs --project=chromium --reporter=line
+      - name: Upload E2E failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-001-e2e-failures
+          path: test-results/
+          if-no-files-found: ignore
