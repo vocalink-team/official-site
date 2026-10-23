@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // NEWS-001 browser E2E with deterministic Supabase mock.
 // Production Auth/Storage/HTTP still require a separate live acceptance pass.
-const mockModule = String.raw\`
+const mockModule = String.raw`
 const articles = [{
   id:'11111111-1111-4111-8111-111111111111',
   title:'公開済みのお知らせ',
@@ -61,7 +61,7 @@ export function createClient(){
   storage:{from(){return {async upload(){return {error:null}},async createSignedUrl(){return {data:{signedUrl:'#'},error:null}}}}}
  };
 }
-\`;
+`;
 test.beforeEach(async ({page}) => {
  await page.route('**/npm/@supabase/supabase-js@2/+esm', route => route.fulfill({status:200,contentType:'text/javascript',body:mockModule}));
  await page.route('**/functions/v1/news-public-media?**', route => route.fulfill({status:200,contentType:'application/json',body:'[]',headers:{'access-control-allow-origin':'*'}}));
