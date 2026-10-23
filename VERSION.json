@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.19",
-  "updated": "2026-10-23T09:33:30Z",
+  "version": "v2.25.0",
+  "updated": "2026-10-23T10:00:00Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: NEWS-001 admin rich-text editor (draft branch, not yet deployed)",
     "fix: synchronize site versions and display update timestamps in JST",
     "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
     "fix: reconcile official site version metadata with recruitment page",
