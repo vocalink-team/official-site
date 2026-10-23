@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+test.use({ baseURL: 'http://127.0.0.1:8765' });
 
 // NEWS-001 browser E2E with deterministic Supabase mock.
 // Production Auth/Storage/HTTP still require a separate live acceptance pass.
