@@ -106,3 +106,18 @@ test('管理者は下書きを保存できる', async ({page}) => {
  await page.getByRole('button',{name:'下書き保存'}).click();
  await expect(page.getByText('下書きを保存しました')).toBeVisible();
 });
+
+test('スマートフォン幅でもニュース一覧に横スクロールが発生しない', async ({page}) => {
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/news.html');
+ await expect(page.getByRole('link',{name:'公開済みのお知らせ'})).toBeVisible();
+ const width=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,view:innerWidth}));
+ expect(width.scroll).toBeLessThanOrEqual(width.view);
+});
+test('スマートフォン幅でも記事詳細を閲覧できる', async ({page}) => {
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/news-detail.html?slug=published-announcement');
+ await expect(page.getByRole('heading',{name:'公開済みのお知らせ'})).toBeVisible();
+ const width=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,view:innerWidth}));
+ expect(width.scroll).toBeLessThanOrEqual(width.view);
+});
