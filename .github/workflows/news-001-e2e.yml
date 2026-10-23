@@ -33,9 +33,7 @@ jobs:
           done
           exit 1
       - name: Browser E2E (mock Supabase)
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
-        run: npx playwright test tests/news-001.spec.mjs --project=chromium --reporter=line
+        run: npx playwright test tests/news-001.spec.mjs --browser=chromium --reporter=line
       - name: Upload E2E failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
