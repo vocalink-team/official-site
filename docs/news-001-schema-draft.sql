@@ -40,3 +40,19 @@ alter table public.news_article_revisions enable row level security;
 alter table public.news_audit_logs enable row level security;
 alter table public.news_media enable row level security;
 -- No grants or policies until admin authorization predicate and media delivery are audited.
+
+-- NEWS-001 proposed policies (not yet activated).
+-- IMPORTANT: private.is_vocalink_admin() currently also consults profiles.role and
+-- team_members.role_key. Verify who can modify those columns before trusting it.
+-- Once verified, policies can use (select private.is_vocalink_admin()).
+-- Public access: published and non-deleted only; scheduled content is excluded.
+-- CREATE POLICY news_articles_public_read ON public.news_articles FOR SELECT TO anon, authenticated
+-- USING (status = 'published' AND published_at <= now() AND deleted_at IS NULL);
+-- CREATE POLICY news_articles_admin_all ON public.news_articles FOR ALL TO authenticated
+-- USING ((select private.is_vocalink_admin()))
+-- WITH CHECK ((select private.is_vocalink_admin()));
+-- For scheduled posts, transition to published using a trusted scheduled job or
+-- a strictly defined computed public predicate. Do not expose scheduled rows directly.
+-- For images, use private Storage bucket news-images; upload is admin-only.
+-- Public media delivery must verify article visibility on each request.
+-- Never generate public signed URLs for draft assets.
