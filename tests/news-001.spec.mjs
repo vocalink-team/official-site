@@ -38,6 +38,8 @@ function query(table) {
  function makeResult(single){
   const source=table==='news_articles'?articles:table==='news_categories'?categories:table==='news_article_revisions'?revisions:table==='news_audit_logs'?logs:media;
   if(state.write){
+   if(new URL(location.href).searchParams.has('mockWriteError'))return {data:null,error:{message:'TEST_WRITE_DENIED'}};
+   (window.__newsWrites ||= []).push({table,...state.write});
    const id=articles[0].id;
    if(state.write.type==='insert'&&table==='news_articles')articles.push({...state.write.value,id});
    return {data:{id},error:null};
@@ -120,4 +122,67 @@ test('スマートフォン幅でも記事詳細を閲覧できる', async ({pag
  await expect(page.getByRole('heading',{name:'公開済みのお知らせ'})).toBeVisible();
  const width=await page.evaluate(()=>({scroll:document.documentElement.scrollWidth,view:innerWidth}));
  expect(width.scroll).toBeLessThanOrEqual(width.view);
+});
+
+test('公開本文はSVG・イベント属性・難読化URLを除去し安全な書式を維持する', async ({page}) => {
+ await page.goto('/news-detail.html?slug=published-announcement');
+ const result=await page.evaluate(async()=>{
+  const {safeArticleHtml}=await import('/news-public.js');
+  const root=safeArticleHtml('<p onclick="window.__xss=1">安全<strong>太字</strong></p><svg onload="window.__xss=1"><a href="javascript:alert(1)">SVG</a></svg><iframe srcdoc="<script>alert(1)</script>"></iframe><math><mtext>危険</mtext></math><a href="java&#x09;script:alert(1)">tab</a><a href="data:text/html,test">data</a><a href="https://example.test/path" onclick="alert(1)">安全リンク</a>');
+  document.querySelector('#body').replaceChildren(root);
+  return {html:root.innerHTML,unsafe:root.querySelectorAll('svg,iframe,math,script,img,[onclick],[onload]').length,links:[...root.querySelectorAll('a')].map(a=>a.getAttribute('href')),xss:window.__xss||0};
+ });
+ expect(result.unsafe).toBe(0);
+ expect(result.links).toEqual([null,null,'https://example.test/path']);
+ expect(result.xss).toBe(0);
+ await expect(page.locator('#body strong')).toHaveText('太字');
+ await expect(page.locator('#body a[href]')).toHaveAttribute('rel','noopener noreferrer');
+});
+
+test('管理者プレビューは危険なリンクとイベント属性を除去する', async ({page}) => {
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await expect(page.locator('#workspace')).toBeVisible();
+ await page.locator('#editor').evaluate(el=>{el.innerHTML='<p onclick="alert(1)">確認<strong>強調</strong></p><a href="java&#x09;script:alert(1)">危険</a><a href="https://example.test">安全</a>'});
+ await page.getByRole('button',{name:'プレビュー',exact:true}).click();
+ await expect(page.locator('#previewBody strong')).toHaveText('強調');
+ await expect(page.locator('#previewBody [onclick]')).toHaveCount(0);
+ await expect(page.locator('#previewBody a[href]')).toHaveCount(1);
+ await expect(page.locator('#previewBody a[href]')).toHaveAttribute('href','https://example.test/');
+});
+
+test('保存拒否時は入力内容を保持し再試行ボタンを復旧する', async ({page}) => {
+ await page.goto('/news-admin.html?mockAdmin=1&mockWriteError=1');
+ await expect(page.locator('#workspace')).toBeVisible();
+ await page.getByLabel('タイトル（必須）').fill('保存失敗テスト');
+ await page.locator('#slug').fill('failed-save');
+ await page.locator('#editor').fill('失わない本文');
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect(page.locator('#saveMessage')).toContainText('TEST_WRITE_DENIED');
+ await expect(page.getByRole('button',{name:'下書き保存',exact:true})).toBeEnabled();
+ await expect(page.getByRole('button',{name:'公開・予約設定して保存'})).toBeEnabled();
+ await expect(page.locator('#title')).toHaveValue('保存失敗テスト');
+ await expect(page.locator('#editor')).toHaveText('失わない本文');
+ await expect(page.locator('#archiveBtn')).toBeDisabled();
+});
+
+test('日本時間の予約日時をUTCへ変換して保存する', async ({page}) => {
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await expect(page.locator('#workspace')).toBeVisible();
+ await page.locator('#title').fill('予約テスト');
+ await page.locator('#slug').fill('scheduled-test');
+ await page.locator('#editor').fill('予約本文');
+ await page.locator('#publishAt').fill('2099-01-02T09:30');
+ await page.getByRole('button',{name:'公開・予約設定して保存'}).click();
+ await expect(page.locator('#saveMessage')).toHaveText('予約投稿を保存しました');
+ const write=await page.evaluate(()=>window.__newsWrites.find(w=>w.table==='news_articles'));
+ expect(write.value.status).toBe('published');
+ expect(write.value.published_at).toBe('2099-01-02T00:30:00.000Z');
+ expect(write.value.scheduled_at).toBe(write.value.published_at);
+});
+
+test('未保存記事への画像添付を止める', async ({page}) => {
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await expect(page.locator('#workspace')).toBeVisible();
+ await page.getByRole('button',{name:'画像をアップロード',exact:true}).click();
+ await expect(page.locator('#imageStatus')).toHaveText('先に記事を下書き保存してください');
 });
