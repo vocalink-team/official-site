@@ -13,8 +13,10 @@ const articles = [{
   category_id:'22222222-2222-4222-8222-222222222222',
   status:'published',
   published_at:'2026-10-01T00:00:00Z',
-  scheduled_at:null, is_pinned:true, deleted_at:null
+  scheduled_at:null, is_pinned:true, deleted_at:null, updated_at:'2026-10-01T00:00:00.000Z'
 }];
+window.__externalNewsEdit=()=>{articles[0].title='他の管理者の更新';articles[0].updated_at='2099-01-01T00:00:00.000Z'};
+window.__newsStoredArticle=()=>({...articles[0]});
 const categories = [{id:'22222222-2222-4222-8222-222222222222',name:'運営情報',sort_order:1,is_active:true}];
 const revisions = [], logs = [], media = [];
 const admin = new URL(location.href).searchParams.has('mockAdmin');
@@ -43,11 +45,17 @@ function query(table) {
    if(window.__throwWrite)throw new Error('TEST_NETWORK_FAILURE');
    if(new URL(location.href).searchParams.has('mockWriteError'))return {data:null,error:{message:'TEST_WRITE_DENIED'}};
    (window.__newsWrites ||= []).push({table,...state.write});
-   const id=articles[0].id;
-   if(state.write.type==='insert'&&table==='news_articles')articles.push({...state.write.value,id});
-   return {data:{id},error:null};
+   if(state.write.type==='update'){
+    const row=source.find(x=>state.filters.every(fn=>fn(x)));
+    if(!row)return {data:null,error:null};
+    Object.assign(row,state.write.value);
+    return {data:{...row},error:null};
+   }
+   const row={...state.write.value,id:crypto.randomUUID(),deleted_at:null};
+   source.push(row);
+   return {data:{...row},error:null};
   }
-  let found=source.filter(x=>state.filters.every(fn=>fn(x)));
+  let found=source.filter(x=>state.filters.every(fn=>fn(x))).map(x=>({...x}));
   const count=found.length;
   if(state.range)found=found.slice(state.range[0],state.range[1]+1);
   else found=found.slice(0,state.limit);
@@ -261,4 +269,50 @@ test('アーカイブ通信例外は入力を保持し操作を復旧する', as
  await expect(page.locator('#title')).toHaveValue('公開済みのお知らせ');
  await expect(page.locator('#archiveBtn')).toBeEnabled();
  await expect(page.locator('#newArticle')).toBeEnabled();
+});
+
+test('他の管理者が更新した記事は古い内容で保存できない',async({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await page.getByRole('button',{name:'編集',exact:true}).click();
+ await page.locator('#title').fill('自分の未保存の編集');
+ await page.evaluate(()=>window.__externalNewsEdit());
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect(page.locator('#saveMessage')).toContainText('記事が更新・削除されたか');
+ await expect(page.locator('#title')).toHaveValue('自分の未保存の編集');
+ expect((await page.evaluate(()=>window.__newsStoredArticle())).title).toBe('他の管理者の更新');
+ await expect(page.locator('#reload')).toBeEnabled();
+ // Refreshing the list alone must not silently grant this stale editor a new version.
+ await page.locator('#reload').click();
+ await expect(page.locator('#articles strong')).toHaveText('他の管理者の更新');
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect(page.locator('#saveMessage')).toContainText('記事が更新・削除されたか');
+ expect((await page.evaluate(()=>window.__newsStoredArticle())).title).toBe('他の管理者の更新');
+});
+
+test('他の管理者が更新した記事を古い画面からアーカイブできない',async({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await page.getByRole('button',{name:'編集',exact:true}).click();
+ await page.evaluate(()=>window.__externalNewsEdit());
+ page.once('dialog',dialog=>dialog.accept());
+ await page.locator('#archiveBtn').click();
+ await expect(page.locator('#saveMessage')).toContainText('記事が更新・削除されたか');
+ const saved=await page.evaluate(()=>window.__newsStoredArticle());
+ expect(saved.status).toBe('published');
+ expect(saved.deleted_at).toBeNull();
+ await expect(page.locator('#archiveBtn')).toBeEnabled();
+});
+
+test('保存成功後は返却された更新日時で続けて編集できる',async({page})=>{
+ await page.goto('/news-admin.html?mockAdmin=1');
+ await page.getByRole('button',{name:'編集',exact:true}).click();
+ await page.locator('#title').fill('一回目');
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect(page.locator('#saveMessage')).toHaveText('下書きを保存しました');
+ await expect(page.locator('#title')).toBeEnabled();
+ const first=await page.evaluate(()=>window.__newsStoredArticle());
+ await page.locator('#title').fill('二回目');
+ await page.getByRole('button',{name:'下書き保存',exact:true}).click();
+ await expect.poll(()=>page.evaluate(()=>window.__newsStoredArticle().title)).toBe('二回目');
+ const second=await page.evaluate(()=>window.__newsStoredArticle());
+ expect(Date.parse(second.updated_at)).toBeGreaterThan(Date.parse(first.updated_at));
 });
