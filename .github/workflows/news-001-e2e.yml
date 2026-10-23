@@ -64,3 +64,34 @@ jobs:
             grep -qi '^x-content-type-options: nosniff' /tmp/news-media-headers
             grep -qi '^access-control-allow-origin: \*' /tmp/news-media-headers
           done
+
+  live-anon-rest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm anonymous REST can only read publicly visible NEWS
+        shell: bash
+        env:
+          NEWS_SUPABASE_KEY: sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe
+        run: |
+          set -euo pipefail
+          api="https://qvxoxrzvxyyribqjnpkb.supabase.co/rest/v1"
+          code=$(curl --retry 2 --max-time 20 -sS -o /tmp/news-articles.json -w '%{http_code}' -H "apikey: $NEWS_SUPABASE_KEY" "$api/news_articles?select=id,status,published_at,deleted_at&limit=100")
+          test "$code" = "200" || { echo "::error::Anon article SELECT failed: HTTP $code"; exit 1; }
+          python3 - <<'PY'
+          import json, datetime
+          rows=json.load(open('/tmp/news-articles.json'))
+          assert isinstance(rows,list)
+          now=datetime.datetime.now(datetime.timezone.utc)
+          for row in rows:
+              assert row['status']=='published'
+              assert row['deleted_at'] is None
+              assert datetime.datetime.fromisoformat(row['published_at'].replace('Z','+00:00'))<=now
+          print('Anonymous article visibility checks passed:',len(rows),'rows')
+          PY
+          code=$(curl --retry 2 --max-time 20 -sS -o /tmp/news-media.json -w '%{http_code}' -H "apikey: $NEWS_SUPABASE_KEY" "$api/news_media?select=id&limit=1")
+          if [ "$code" != "401" ] && [ "$code" != "403" ]; then
+            echo "::error::Anonymous media table must deny access, got HTTP $code"
+            exit 1
+          fi
+          echo "Anonymous media table denied as expected: HTTP $code"
