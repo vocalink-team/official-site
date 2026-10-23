@@ -27,7 +27,7 @@ function query(table) {
   order(){return q},
   range(a,b){state.range=[a,b];return q},
   limit(n){state.limit=n;return q},
-  or(v){const m=/^title\\.ilike\\.%(.+)%\\,excerpt\\.ilike\\.%(.+)%$/.exec(v);if(m){const keyword=m[1].toLowerCase();state.filters.push(x=>(x.title||'').toLowerCase().includes(keyword)||(x.excerpt||'').toLowerCase().includes(keyword))}return q},
+  or(v){const parts=v.split(',');if(parts.length===2){const keyword=parts[0].replace('title.ilike.%','').replace(/%$/,'').toLowerCase();state.filters.push(x=>(x.title||'').toLowerCase().includes(keyword)||(x.excerpt||'').toLowerCase().includes(keyword))}return q},
   insert(value){state.write={type:'insert',value};return q},
   update(value){state.write={type:'update',value};return q},
   maybeSingle(){return Promise.resolve(makeResult(true))},
