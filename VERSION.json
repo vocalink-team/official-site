@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.22",
-  "updated": "2026-10-26T11:04:20Z",
+  "version": "v2.24.24",
+  "updated": "2026-10-26T11:57:16Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: restore truncated home page sections and correct scope initialization",
     "Update index.html",
     "Remove electronic signature pages and navigation",
     "Create CNAME",
@@ -29,5 +30,5 @@
     "Update sitemap.html",
     "style: align sitemap CSS declarations and indentation"
   ],
-  "commit": "8bec51826a73381487774677698b0fe882ef56a5"
+  "commit": "870556dbdaabab1f81af80dba97af5cc2d9be41d"
 }

@@ -29,6 +29,7 @@ jobs:
           test -f VERSION.json
           test -f admin.html
           grep -q 'vl-ui.css' index.html
+          node --test tests/site-regressions.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
