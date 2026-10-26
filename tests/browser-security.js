@@ -55,12 +55,13 @@ const dep = require('../security/dependencies.json').supabase;
           const probe = document.createElement('span');
           probe.setAttribute('style', 'outline:7px solid rgb(1,2,3)');
           document.body.append(probe);
-          const blocked = { before, after: getComputedStyle(document.body).color, outline: getComputedStyle(probe).outlineWidth, violations: window.__cspViolations.slice(-3) };
+          const blocked = { before, after: getComputedStyle(document.body).color, outlineStyle: getComputedStyle(probe).outlineStyle, outlineWidth: getComputedStyle(probe).outlineWidth };
           style.remove(); probe.remove();
           return blocked;
         });
         assert.equal(stylesBlocked.after, stylesBlocked.before, file + ': unapproved style block rejected ' + JSON.stringify(stylesBlocked));
-        assert.equal(stylesBlocked.outline, '0px', file + ': unapproved style attribute rejected ' + JSON.stringify(stylesBlocked));
+        assert.equal(stylesBlocked.outlineStyle, 'none', file + ': unapproved style attribute rejected ' + JSON.stringify(stylesBlocked));
+        assert.notEqual(stylesBlocked.outlineWidth, '7px', file + ': injected outline width rejected');
         if (file === 'projects.html') {
           const widths = await page.evaluate(() => {
             const host = document.createElement('div'); host.style.width = '200px';
