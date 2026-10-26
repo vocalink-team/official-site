@@ -9,9 +9,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ここで自作サイトを一度起動するステップを挟む（例: npm start など）
+      - name: Start local static site for the scanner
+        run: |
+          python3 -m http.server 3000 --bind 0.0.0.0 > /tmp/official-site-http.log 2>&1 &
+          python3 - <<'PYREADY'
+          import time, urllib.request
+          for attempt in range(30):
+              try:
+                  urllib.request.urlopen('http://localhost:3000/', timeout=1).close()
+                  break
+              except OSError:
+                  time.sleep(0.2)
+          else:
+              raise SystemExit('Static server did not start')
+          PYREADY
 
       - name: OWASP ZAP Full Scan
         uses: zaproxy/action-full-scan@v0.12.0
         with:
-          target: 'http://localhost:3000' # 起動したローカルURLを指定
+          target: 'http://localhost:3000'
+          allow_issue_writing: false

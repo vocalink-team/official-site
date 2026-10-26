@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://vocalink-team.github.io/official-site/sitemap.xml
+Sitemap: https://www.vocalink-team.com/sitemap.xml
