@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.25.4",
-  "updated": "2026-10-23T11:37:37.805Z",
+  "version": "v2.25.5",
+  "updated": "2026-10-26T11:37:40Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "docs: resume VL-0002 stage06; confirm 19 passing browser tests and current NEWS access controls",
     "fix: compare NEWS updated_at on save/archive to reject stale edits",
     "fix: prevent NEWS in-flight editor switching and duplicate mutations; recover archive network errors",
     "test: add opt-in real authentication and image lifecycle acceptance runner",

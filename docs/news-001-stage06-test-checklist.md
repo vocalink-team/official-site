@@ -86,10 +86,25 @@
 - [x] 実DBの条件付き更新試験：最初の更新1件、古い値での保存0件、古い値でのアーカイブ0件、最新値での更新1件。
 - [x] DB試験をROLLBACKし、別照会でテスト記事残存0件を確認。
 - [x] Run 39947405798 の実匿名REST・画像API拒否試験合格。
-- [ ] ChromiumモックE2E 19件（既存16＋追加3）。記録時点ではChromiumインストール工程が継続中、テスト本体未開始。合格扱いしない。
+- [x] ChromiumモックE2E 19件（既存16＋追加3）。2026-10-26にRun 39947405798の完了とジョブログの `19 passed (9.2s)` を確認。
 - CI: https://github.com/vocalink-team/official-site/actions/runs/39947405798
 - 試験対象コミット: a497b430110b44b55907ac7a0cd3786517705d38
 - 追加ケース: 他編集者の更新後の保存拒否と入力保持／古い画面からのアーカイブ拒否／保存成功後の連続編集。
 - DB試験は単一トランザクション内の古い更新条件の検証であり、実管理者2アカウント・並列DBセッションによる競合試験ではない。
 - この保護は新管理画面の更新経路が対象。DBのupdated_at自動更新トリガーは存在せず、更新日時を変更しない外部更新は検知対象外。
 - 実認証・実画像E2E、実機、最終検収は未完了。本番未公開・Draft維持。
+
+## 2026-10-26 VL-0002 再開時の確認（開発v2.25.5）
+- 再開工程: NEWS-001 第06工程。対象ブランチは `feature/news-001-foundation`、Draft PR #7。
+- [x] 前回保留だったRun 39947405798は全3ジョブ成功。ChromiumモックE2Eは19/19合格。新規の実認証試験ではなく、既存CIの結果確定。
+- [x] 現在のDBでNEWS関連5テーブルすべてのRLS有効を確認。
+- [x] 記事の一般公開条件は `status='published' AND published_at <= now() AND deleted_at IS NULL`。
+- [x] 管理者ポリシーは `app_metadata.role` のadmin/super_adminを参照。匿名の記事・画像メタデータINSERT権限はなし。
+- [x] 改訂履歴・監査ログはauthenticatedの直接INSERT/TRUNCATE権限なし。
+- [x] `news-images`は非公開、JPEG/PNG/WebP、最大5,242,880バイトの設定を確認。
+- [x] 今回の実HTTP確認5項目: 不正記事ID/存在しない画像ID/存在しない記事IDは各404（no-store・nosniff・CORSも確認）、匿名記事SELECTは200・0件、画像メタデータの匿名直接SELECTは401。空データのため実画像200の証拠とはしない。
+- Security AdvisorのNEWSテーブルに関する指摘はなし。プロジェクト全体には漏えいパスワード保護無効のWARNと、recruit_submission_limitsのポリシーなしINFOが残る。今回設定は変更していない。参照: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection / https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+- [x] 予約投稿の実装を再確認。未来のpublished_atとstatus=publishedを保存し、RLSの時刻条件で公開する方式。cronによるstatus変更を前提としない。自然な時刻到達の実試験は未完了。
+- 公開mainはv2.24.23（fc469b39e337904884c7b38d575dd36f76d84036）。NEWS実装は未統合。開発版の合格を公開サイトの合格と扱わない。
+- 次の必須検収は実管理者/一般ユーザーの認証・実画像のライフサイクル・実機。検証用ログインは確立しておらず、パスワードの作成/変更や権限昇格で代用しない。
+- DB/Storage設定・既存記事の変更は行っていない。全ページの版統一、mainとの差分調整、最終レビューも未完了。Draft維持・第06工程は継続中。
