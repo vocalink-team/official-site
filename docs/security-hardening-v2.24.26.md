@@ -16,3 +16,7 @@ After editing an inline script, run `node tools/static-security.cjs`, then `npm 
 Meta CSP does not provide `frame-ancestors`, X-Frame-Options, HSTS, nosniff, or Permissions-Policy response headers. These remain hosting-layer work. A passing local scanner or isolated browser test is not a complete production security audit. Actual administrator login, physical device checks, real Turnstile completion, successful production application storage and notification delivery remain unverified. Supabase leaked-password protection WARN and rate-limit-table no-policy INFO are outside this code change; no auth configuration or RLS policy is changed.
 
 Sources: https://www.w3.org/TR/CSP/ ; https://developers.cloudflare.com/turnstile/reference/content-security-policy/ ; https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/ ; https://supabase.com/docs/guides/security/npm-security
+
+## v2.24.27 follow-up
+
+The legacy branch-based Jekyll workflow remains active alongside the explicit deployment. `_config.yml` excludes the same development directories from its output as a compatibility safeguard.

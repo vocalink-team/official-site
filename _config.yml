@@ -1,0 +1,14 @@
+# Also protect the legacy branch-based Pages build while it remains enabled.
+exclude:
+  - .github
+  - docs
+  - security
+  - supabase
+  - tests
+  - tools
+  - node_modules
+  - vendor
+  - package.json
+  - package-lock.json
+  - README.md
+  - VL-0001-BROWSER-TEST.md
