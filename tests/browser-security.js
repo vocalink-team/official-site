@@ -11,10 +11,11 @@ const dep = require('../security/dependencies.json').supabase;
   assert.equal('sha384-' + crypto.createHash('sha384').update(sdk).digest('base64'), dep.integrity);
   const browser = await chromium.launch();
   try {
-    const files = fs.readdirSync('.').filter(n => n.endsWith('.html'));
+    const files = fs.readdirSync('.').filter(n => n.endsWith('.html')), failures = [];
     for (const width of [1440, 390]) {
       for (const file of files) {
         const context = await browser.newContext({ viewport: { width, height: 900 } });
+        try {
         const page = await context.newPage(), violations = [], errors = [];
         await page.addInitScript(() => {
           window.__cspViolations = [];
@@ -34,7 +35,7 @@ const dep = require('../security/dependencies.json').supabase;
         violations.push(...await page.evaluate(() => window.__cspViolations));
         assert.deepEqual(violations, [], file + ': CSP');
         assert.deepEqual(errors, [], file + ': runtime');
-        if (fs.readFileSync(file, 'utf8').includes(dep.url)) assert.equal(await page.evaluate(() => typeof window.supabase?.createClient), 'function', file);
+        if (fs.readFileSync(file, 'utf8').includes('src="' + dep.url + '"')) assert.equal(await page.evaluate(() => typeof window.supabase?.createClient), 'function', file);
         if (file === 'index.html' || file === 'recruit.html') {
           assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), file + ': mobile overflow');
         }
@@ -60,9 +61,22 @@ const dep = require('../security/dependencies.json').supabase;
           await page.waitForTimeout(100);
           assert.equal(page.url(), before, 'native fallback must not put personal fields in URL');
         }
+        if (file === 'contracts.html') {
+          const title = await page.evaluate(() => {
+            contracts = [{ id: 'isolated-contract', contract_number: 'TEST-1', title: 'Isolated contract', status: 'active', contract_type: 'other', amount: 0 }];
+            render();
+            document.querySelector('button[data-contract-id]').click();
+            return document.getElementById('fTitle').value;
+          });
+          assert.equal(title, 'Isolated contract', 'delegated detail button works under CSP');
+        }
         console.log('PASS', width, file);
-        await context.close();
+        } catch (error) {
+          failures.push({ width, file, error: error.message });
+          console.error('FAIL', width, file, error.message);
+        } finally { await context.close(); }
       }
     }
+    assert.deepEqual(failures, [], 'All browser cases must pass');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
