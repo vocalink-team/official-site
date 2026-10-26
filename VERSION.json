@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.25",
-  "updated": "2026-10-26T12:09:58Z",
+  "version": "v2.24.26",
+  "updated": "2026-10-26T14:23:19.951447Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: pin browser SDK with SRI, hash inline scripts, block native form fallback, and isolate scanner files",
     "fix: support recruitment on the official domain; preserve request memos; escape finance entries; enforce live team access",
     "fix: restore truncated home page sections and correct scope initialization",
     "Update index.html",
@@ -31,5 +32,5 @@
     "Update sitemap.html",
     "style: align sitemap CSS declarations and indentation"
   ],
-  "commit": "2e5457abcb3570bdbb60e213b36c944b9b2c107e"
+  "commit": "bfe6ee27b51e31ddc1d901b16d3264e66759e590"
 }

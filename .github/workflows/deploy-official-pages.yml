@@ -33,9 +33,10 @@ jobs:
           test -f admin.html
           grep -q 'vl-ui.css' index.html
           node --test tests/*.cjs
+          node tools/build-public.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4
