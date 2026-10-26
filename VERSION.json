@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.27",
-  "updated": "2026-10-26T14:31:13.262366Z",
+  "version": "v2.24.28",
+  "updated": "2026-10-26T23:53:26.300505Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "security: restrict images and authorize inline styles by hash; protect custom 404 responses",
     "security: exclude development files from legacy Jekyll Pages builds",
     "security: pin browser SDK with SRI, hash inline scripts, block native form fallback, and isolate scanner files",
     "fix: support recruitment on the official domain; preserve request memos; escape finance entries; enforce live team access",
@@ -33,5 +34,5 @@
     "Update sitemap.html",
     "style: align sitemap CSS declarations and indentation"
   ],
-  "commit": "18fde64ac42ba9fcae911abf4fb85f52ef20ed3e"
+  "commit": "b4bd0ea5bdc6e7cec48675a4457bfc72b386bb11"
 }

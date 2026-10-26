@@ -12,6 +12,9 @@ test('all pages carry current script hashes and reject unapproved script and nat
     assert.ok(html.indexOf(tag(html)) < html.indexOf('</head>'), name);
     assert.doesNotMatch(html, /\son\w+\s*=\s*["']/i, name);
     assert.doesNotMatch(html, /supabase-js@2(?:\/\+esm|["'])/, name);
+    const csp = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/)[1];
+    assert.doesNotMatch(csp, /'unsafe-inline'/, name);
+    assert.doesNotMatch(csp, /img-src[^;]*\shttps:(?:;|\s|$)/, name);
     for (const m of html.matchAll(/<script\b[^>]*\bsrc="([^"]+)"[^>]*>/gi)) {
       if (m[1] === 'https://challenges.cloudflare.com/turnstile/v0/api.js') continue;
       if (m[1].startsWith('https:')) {

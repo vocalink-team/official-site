@@ -47,6 +47,36 @@ const dep = require('../security/dependencies.json').supabase;
         // A new inline script, not listed in the policy, must not execute.
         await page.evaluate(() => { const el = document.createElement('script'); el.textContent = 'window.__unexpectedScriptRan = true'; document.body.append(el); });
         assert.equal(await page.evaluate(() => window.__unexpectedScriptRan), undefined, file + ': injected script blocked');
+        const stylesBlocked = await page.evaluate(() => {
+          const before = getComputedStyle(document.body).color;
+          const style = document.createElement('style');
+          style.textContent = 'body{color:rgb(1,2,3)!important}';
+          document.head.append(style);
+          const probe = document.createElement('span');
+          probe.setAttribute('style', 'outline:7px solid rgb(1,2,3)');
+          document.body.append(probe);
+          const blocked = getComputedStyle(document.body).color === before && getComputedStyle(probe).outlineWidth === '0px';
+          style.remove(); probe.remove();
+          return blocked;
+        });
+        assert.equal(stylesBlocked, true, file + ': unapproved style blocks and attributes rejected');
+        if (file === 'projects.html') {
+          const widths = await page.evaluate(() => {
+            const host = document.createElement('div'); host.style.width = '200px';
+            document.body.append(host);
+            const result = [0, 1, 37, 80, 100].map(value => {
+              const bar = document.createElement('i');
+              bar.style.display = 'block';
+              bar.setAttribute('style', 'width:' + value + '%');
+              host.append(bar);
+              // CSSOM assignments remain available to trusted application scripts.
+              bar.style.display = 'block';
+              return Math.round(parseFloat(getComputedStyle(bar).width));
+            });
+            host.remove(); return result;
+          });
+          assert.deepEqual(widths, [0, 2, 74, 160, 200], 'existing integer progress widths remain authorized');
+        }
         if (file === 'recruit.html') {
           await page.locator('[name="name"]').fill('Isolated browser test');
           await page.locator('[name="email"]').fill('test@example.invalid');
@@ -77,6 +107,12 @@ const dep = require('../security/dependencies.json').supabase;
         } finally { await context.close(); }
       }
     }
+    const page = await browser.newPage();
+    const missing = await page.goto('http://127.0.0.1:3000/does-not-exist');
+    assert.equal(missing.status(), 404);
+    assert.equal(await page.title(), 'ページが見つかりません | VOCALINK-TEAM');
+    assert.equal(await page.locator('meta[http-equiv="Content-Security-Policy"]').count(), 1);
+    await page.close();
     assert.deepEqual(failures, [], 'All browser cases must pass');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

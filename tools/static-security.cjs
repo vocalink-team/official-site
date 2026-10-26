@@ -8,9 +8,21 @@ function policy(html) {
   const hashes = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)]
     .filter(m => !/\bsrc\s*=/.test(m[1]) && m[2].trim() && !/application\/ld\+json/.test(m[1]))
     .map(m => hash(m[2].replace(/\r\n?/g, '\n')));
+  const styleHashes = [...html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)]
+    .map(m => hash(m[1].replace(/\r\n?/g, '\n')));
+  const attributeStyles = [...html.matchAll(/\bstyle="([^"]*)"/gi)]
+    .map(m => m[1]).filter(value => !value.includes('${'));
+  // projects.progress is an integer. Permit the existing 0–100% render values,
+  // without authorizing arbitrary CSS supplied by a database string.
+  if (html.includes('style="width:${p.progress}%"')) {
+    for (let value = 0; value <= 100; value++) attributeStyles.push('width:' + value + '%');
+  }
+  const attributeHashes = [...new Set(attributeStyles.map(hash))];
   return ["default-src 'self'", "base-uri 'none'", "object-src 'none'", "form-action 'none'",
     "script-src 'self' " + dependency.url + ' https://challenges.cloudflare.com ' + [...new Set(hashes)].join(' '),
-    "script-src-attr 'none'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob: https:",
+    "script-src-attr 'none'", "style-src 'self' " + [...new Set(styleHashes)].join(' '),
+    "style-src-attr " + (attributeHashes.length ? "'unsafe-hashes' " + attributeHashes.join(' ') : "'none'"),
+    "img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co",
     "font-src 'self' data:", "connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com",
     "frame-src 'self' https://challenges.cloudflare.com", "worker-src 'self' blob:"].join('; ');
 }

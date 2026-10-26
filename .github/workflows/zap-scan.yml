@@ -12,7 +12,7 @@ jobs:
       - name: Start local static site for the scanner
         run: |
           node tools/build-public.cjs
-          python3 -m http.server 3000 --directory _site --bind 0.0.0.0 > /tmp/official-site-http.log 2>&1 &
+          python3 tools/serve-static.py --directory _site --bind 0.0.0.0 > /tmp/official-site-http.log 2>&1 &
           python3 - <<'PYREADY'
           import time, urllib.request
           for attempt in range(30):

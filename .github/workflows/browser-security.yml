@@ -21,5 +21,5 @@ jobs:
       - run: npx --no-install playwright install --with-deps chromium
       - name: Test isolated site in desktop and mobile viewports
         run: |
-          python3 -m http.server 3000 --directory _site --bind 127.0.0.1 >/tmp/site.log 2>&1 &
+          python3 tools/serve-static.py --directory _site --bind 127.0.0.1 >/tmp/site.log 2>&1 &
           node tests/browser-security.js
