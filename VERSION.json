@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.21",
-  "updated": "2026-10-26T09:14:14.749Z",
+  "version": "v2.24.22",
+  "updated": "2026-10-26T11:04:20Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "Update index.html",
     "Remove electronic signature pages and navigation",
     "Create CNAME",
     "fix: synchronize site versions and display update timestamps in JST",
@@ -26,9 +27,7 @@
     "chore: add PR browser preview artifact and safe review guide",
     "chore: update contact email to contact@vocalink-team.com",
     "Update sitemap.html",
-    "style: align sitemap CSS declarations and indentation",
-    "style: format sitemap HTML and CSS for readability",
-    "chore: remove services and security section from visitor sitemap"
+    "style: align sitemap CSS declarations and indentation"
   ],
-  "commit": "f5a392d28aee7a70bb95acfece04244dcb57a61e"
+  "commit": "8bec51826a73381487774677698b0fe882ef56a5"
 }
