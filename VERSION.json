@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.20",
-  "updated": "2026-10-26T08:56:12Z",
+  "version": "v2.24.21",
+  "updated": "2026-10-26T09:14:14.749Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "Remove electronic signature pages and navigation",
     "Create CNAME",
     "fix: synchronize site versions and display update timestamps in JST",
     "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
@@ -29,5 +30,5 @@
     "style: format sitemap HTML and CSS for readability",
     "chore: remove services and security section from visitor sitemap"
   ],
-  "commit": "eecd432a96e1d3c00849b1f5917ea0553198fa6b"
+  "commit": "f5a392d28aee7a70bb95acfece04244dcb57a61e"
 }
