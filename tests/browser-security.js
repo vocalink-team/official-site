@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const dep = require('../security/dependencies.json').supabase;
+const memoCases = ['', '\n先頭改行', '\n\n複数改行\n末尾\n', '</textarea><script>window.__memoInjected=true</script>', '<b>日本語 & text</b>'];
 (async () => {
   const response = await fetch(dep.url);
   assert.ok(response.ok, 'Pinned SDK download');
@@ -26,6 +27,7 @@ const dep = require('../security/dependencies.json').supabase;
           const url = route.request().url();
           if (url === dep.url) return route.fulfill({ contentType: 'application/javascript', body: sdk, headers: { 'access-control-allow-origin': '*' } });
           if (url.startsWith('https://challenges.cloudflare.com/')) return route.fulfill({ contentType: 'application/javascript', body: 'window.turnstile={reset(){}};' });
+          if (file === 'admin.html' && url.includes('/rest/v1/service_requests')) return route.fulfill({ contentType: 'application/json', body: JSON.stringify(memoCases.map((memo, i) => ({ id: 'isolated-request-' + i, title: 'Isolated memo ' + i, status: 'new', admin_note: memo }))), headers: { 'access-control-allow-origin': '*' } });
           if (url.includes('.supabase.co/')) return route.fulfill({ status: url.includes('/auth/') ? 401 : 200, contentType: 'application/json', body: url.includes('/auth/') ? '{"message":"No session"}' : '[]', headers: { 'access-control-allow-origin': '*' } });
           return route.abort();
         });
@@ -94,16 +96,16 @@ const dep = require('../security/dependencies.json').supabase;
           assert.equal(page.url(), before, 'native fallback must not put personal fields in URL');
         }
         if (file === 'admin.html') {
-          for (const memo of ['', '\n先頭改行', '\n\n複数改行\n末尾\n', '</textarea><script>window.__memoInjected=true</script>', '<b>日本語 & text</b>']) {
-            const result = await page.evaluate(memo => {
-              openRequest({ id: 'isolated-request', status: 'new', admin_note: memo });
-              return { value: document.getElementById('editNote').value, scripts: document.querySelectorAll('#detailBody script').length };
-            }, memo);
-            assert.equal(result.value, memo, 'memo must round-trip exactly, including leading newlines');
-            assert.equal(result.scripts, 0, 'memo must remain plain text');
+          // The module is private; exercise its real event handlers with isolated API data.
+          await page.evaluate(() => document.querySelector('.nav button[data-tab="requests"]').click());
+          await page.waitForFunction(() => document.querySelectorAll('[data-request-edit]').length === 5);
+          for (const [i, memo] of memoCases.entries()) {
+            await page.evaluate(i => document.querySelector('[data-request-edit="isolated-request-' + i + '"]').click(), i);
+            assert.equal(await page.locator('#editNote').inputValue(), memo, 'memo must round-trip exactly, including leading newlines');
+            assert.equal(await page.locator('#detailBody script').count(), 0, 'memo must remain plain text');
             assert.equal(await page.evaluate(() => window.__memoInjected), undefined);
+            await page.locator('#closeRequest').click();
           }
-          await page.locator('#closeRequest').click();
         }
         if (file === 'contracts.html') {
           const title = await page.evaluate(() => {
