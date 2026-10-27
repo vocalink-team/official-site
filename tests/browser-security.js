@@ -93,6 +93,18 @@ const dep = require('../security/dependencies.json').supabase;
           await page.waitForTimeout(100);
           assert.equal(page.url(), before, 'native fallback must not put personal fields in URL');
         }
+        if (file === 'admin.html') {
+          for (const memo of ['', '\n先頭改行', '\n\n複数改行\n末尾\n', '</textarea><script>window.__memoInjected=true</script>', '<b>日本語 & text</b>']) {
+            const result = await page.evaluate(memo => {
+              openRequest({ id: 'isolated-request', status: 'new', admin_note: memo });
+              return { value: document.getElementById('editNote').value, scripts: document.querySelectorAll('#detailBody script').length };
+            }, memo);
+            assert.equal(result.value, memo, 'memo must round-trip exactly, including leading newlines');
+            assert.equal(result.scripts, 0, 'memo must remain plain text');
+            assert.equal(await page.evaluate(() => window.__memoInjected), undefined);
+          }
+          await page.locator('#closeRequest').click();
+        }
         if (file === 'contracts.html') {
           const title = await page.evaluate(() => {
             contracts = [{ id: 'isolated-contract', contract_number: 'TEST-1', title: 'Isolated contract', status: 'active', contract_type: 'other', amount: 0 }];

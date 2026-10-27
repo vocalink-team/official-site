@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.28",
-  "updated": "2026-10-26T23:53:26.300505Z",
+  "version": "v2.24.29",
+  "updated": "2026-10-27T01:51:58.639293Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: preserve leading newlines and plain-text rendering in administrator request memos",
     "security: restrict images and authorize inline styles by hash; protect custom 404 responses",
     "security: exclude development files from legacy Jekyll Pages builds",
     "security: pin browser SDK with SRI, hash inline scripts, block native form fallback, and isolate scanner files",
@@ -26,13 +27,7 @@
     "fix: align SERVICE card top edges and equalize heights",
     "fix: add explicit GitHub Pages deploy workflow and prevent version double bump",
     "fix: unify ABOUT nav and improve contrast (v2.24.4)",
-    "fix: normalize ABOUT nav pill and improve about-section contrast",
-    "Merge PR #2: VL-0001 UI refresh (v2.24.2)",
-    "fix: prevent auto-version from double bumping versioned PR merges",
-    "chore: add PR browser preview artifact and safe review guide",
-    "chore: update contact email to contact@vocalink-team.com",
-    "Update sitemap.html",
-    "style: align sitemap CSS declarations and indentation"
+    "fix: normalize ABOUT nav pill and improve about-section contrast"
   ],
   "commit": "b4bd0ea5bdc6e7cec48675a4457bfc72b386bb11"
 }
