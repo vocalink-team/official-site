@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com 'sha256-Tas1VKWFgHuoVrp47IvlAwsKNsqp7fK67JSRFYQVcKs='; script-src-attr 'none'; style-src 'self' 'sha256-OMgkKYwhMZAXYKFTVyUuQCaGoZAbGPeub8KxuymiOks='; style-src-attr 'none'; img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co; font-src 'self' data:; connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="version" content="2.25.6"><meta name="description" content="VOCALINK-TEAMのお知らせ記事"><title>お知らせ | VOCALINK-TEAM</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Noto Sans JP",sans-serif;background:#10100f;color:#eeeae2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 5%,#343027,transparent 40%),#10100f}a{color:#d7c6a9}
+.wrap{width:min(850px,calc(100% - 32px));margin:auto}header{border-bottom:1px solid #49453f;padding:20px 0}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.brand{font-weight:800;text-decoration:none;font-size:20px;color:#eeeae2}.brand span{color:#b9a78f}nav{display:flex;gap:18px;font-size:14px}
+main{padding:52px 0 100px}h1{font-size:clamp(30px,5vw,48px);line-height:1.35;overflow-wrap:anywhere}h2{font-size:25px}p,li{line-height:1.85}
+.meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;color:#c5bdb1}.pin{background:#8b6e44;color:white;padding:4px 9px;border-radius:99px}
+article{margin-top:30px;background:#1c1b18;border:1px solid #454039;border-radius:16px;padding:clamp(20px,5vw,44px)}.article-body{line-height:1.9;overflow-wrap:anywhere}.article-body blockquote{border-left:3px solid #a68b63;margin:20px 0;padding-left:20px}.article-body a{overflow-wrap:anywhere}.article-body p{margin:1.3em 0}.news-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px;margin-top:28px}.news-gallery img{width:100%;height:auto;max-height:560px;object-fit:contain;border-radius:12px;background:#0b0c0d;border:1px solid #454039}
+.muted{color:#c5bdb1}.back{display:inline-block;margin-top:24px}footer{border-top:1px solid #454039;padding:28px 0;color:#c5bdb1;font-size:13px}
+a:focus-visible{outline:3px solid #e5a76c;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style><meta name="referrer" content="strict-origin-when-cross-origin"></head><body><header><div class="wrap top"><a class="brand" href="index.html">VOCALINK<span>-TEAM</span></a><nav aria-label="主要ナビゲーション"><a href="index.html">HOME</a><a href="news.html">NEWS</a></nav></div></header>
+<main class="wrap"><a href="news.html">← お知らせ一覧に戻る</a><p id="status" role="status" aria-live="polite" class="muted">記事を読み込んでいます…</p>
+<article id="article" hidden><div id="meta" class="meta"></div><h1 id="title"></h1><p id="excerpt" class="muted"></p><div id="body" class="article-body"></div><div id="gallery" class="news-gallery" aria-label="記事の添付画像"></div></article>
+<a class="back" href="news.html">← お知らせ一覧へ</a></main><footer><div class="wrap">© 2026 VOCALINK-TEAM</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script><script type="module">
+import {sb,formatJst,safeArticleHtml} from './news-public.js?v=2.25.6';
+const $=id=>document.getElementById(id),slug=new URLSearchParams(location.search).get('slug')||'';
+async function load(){
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)||slug.length>120){$('status').textContent='記事が見つかりません。';return}
+ const {data,error}=await sb.from('news_articles').select('id,title,slug,excerpt,body_json,category_id,published_at,is_pinned')
+ .eq('slug',slug).eq('status','published').is('deleted_at',null).lte('published_at',new Date().toISOString()).maybeSingle();
+ if(error){$('status').textContent='記事を読み込めませんでした。時間をおいて再度お試しください。';return}
+ if(!data){$('status').textContent='記事が見つかりません。';return}
+ document.title=data.title+' | VOCALINK-TEAM';$('title').textContent=data.title;$('excerpt').textContent=data.excerpt||'';
+ const time=document.createElement('time');time.dateTime=data.published_at;time.textContent=formatJst(data.published_at);$('meta').append(time);
+ if(data.is_pinned){const tag=document.createElement('strong');tag.className='pin';tag.textContent='重要';$('meta').append(tag)}
+ if(data.category_id){const {data:category}=await sb.from('news_categories').select('name').eq('id',data.category_id).eq('is_active',true).maybeSingle();if(category){const span=document.createElement('span');span.textContent=category.name;$('meta').append(span)}}
+ const content=data.body_json?.format==='safe-html-v1'?data.body_json.html:'';$('body').append(safeArticleHtml(content));
+ $('status').hidden=true;$('article').hidden=false;
+ // The gateway re-checks publication for both the list and every individual image request.
+ const endpoint='https://qvxoxrzvxyyribqjnpkb.supabase.co/functions/v1/news-public-media';
+ try{
+  const response=await fetch(endpoint+'?article='+encodeURIComponent(data.id),{cache:'no-store'});
+  if(response.ok){const images=await response.json();
+   for(const image of Array.isArray(images)?images.slice(0,24):[]){
+    if(!/^[0-9a-f-]{36}$/i.test(image.id))continue;
+    const img=document.createElement('img');img.loading='lazy';img.alt='記事の添付画像';img.referrerPolicy='no-referrer';
+    img.src=endpoint+'?id='+encodeURIComponent(image.id);$('gallery').append(img);
+   }
+  }
+ }catch{ /* The article remains readable when media delivery is unavailable. */ }
+}
+await load();
+</script></body></html>

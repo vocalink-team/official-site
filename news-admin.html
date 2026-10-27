@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com 'sha256-AtOzpH9Wmb2aDH8HlkG+rb/oM8eQtuYcn9LqHB7EHxE='; script-src-attr 'none'; style-src 'self' 'sha256-F91PSoBbfgE9CqNrYXLKfLxDj14fSsvt4OWnWjITPRY='; style-src-attr 'unsafe-hashes' 'sha256-sO5+/BkhUn3igTxO3TvUYKuMyotxhhTMKjeb4jeqsnU='; img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co; font-src 'self' data:; connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>NEWS管理 | VOCALINK-TEAM</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,"Noto Sans JP",sans-serif;background:#0b0d10;color:#eef2f5}
+*{box-sizing:border-box}body{margin:0}.wrap{max-width:1100px;margin:auto;padding:24px 16px 70px}
+a{color:#9bcdf1}header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+h1{font-size:clamp(24px,4vw,40px);margin:16px 0}.panel{background:#151a20;border:1px solid #333d47;border-radius:16px;padding:20px;margin:16px 0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:13px;color:#cad5de;margin:12px 0 4px}
+input,select,textarea{display:block;width:100%;background:#0c1116;border:1px solid #46515b;border-radius:8px;color:white;padding:10px;font:inherit}
+textarea{min-height:90px}button{border:1px solid #52606d;border-radius:9px;background:#293744;color:white;padding:9px 14px;cursor:pointer;font:inherit}
+button:disabled{opacity:.45;cursor:not-allowed}button:hover:not(:disabled){background:#3d5264}
+button:focus-visible,input:focus-visible,select:focus-visible,[contenteditable]:focus-visible{outline:3px solid #ffbc76;outline-offset:2px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.editor{min-height:260px;background:#f8fafc;color:#101820;border-radius:8px;padding:18px;line-height:1.75;overflow-wrap:anywhere}
+.editor a,.preview a{color:#146ba3}.preview{background:#fff;color:#151b22;border-radius:10px;padding:20px;line-height:1.7;overflow-wrap:anywhere}
+.muted{color:#a8b6c2;font-size:13px}.error{color:#ffb0b0}.success{color:#99edbf}
+.list{display:grid;gap:10px}.item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid #35414b;border-radius:10px}
+.item small{display:block;color:#a8b6c2}#workspace[hidden],#login[hidden],#previewPanel[hidden]{display:none}
+</style><meta name="referrer" content="strict-origin-when-cross-origin"></head>
+<body><div class="wrap"><header><div><a href="admin.html">← 管理コンソールへ戻る</a><h1>お知らせ管理 <small>NEWS-001</small></h1></div><span id="identity" class="muted"></span></header>
+<p id="status" role="status" aria-live="polite" class="muted">認証を確認しています…</p>
+<section id="login" class="panel" hidden><h2>管理者ログイン</h2><form id="loginForm"><label for="email">メールアドレス</label><input id="email" type="email" autocomplete="username" required><label for="password">パスワード</label><input id="password" type="password" autocomplete="current-password" required><button type="submit">ログイン</button></form></section>
+<main id="workspace" hidden>
+<section class="panel"><div class="toolbar"><button type="button" id="newArticle">新規記事</button><button type="button" id="reload">一覧更新</button><button type="button" id="logout">ログアウト</button></div><h2>記事一覧</h2><div id="articles" class="list"></div></section>
+<section class="panel"><h2 id="formHeading">新規記事</h2><form id="articleForm">
+<div class="grid"><div><label for="title">タイトル（必須）</label><input id="title" maxlength="160" required></div><div><label for="slug">URL識別子（英小文字・数字・ハイフン）</label><input id="slug" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="120" required></div></div>
+<label for="excerpt">概要</label><textarea id="excerpt" maxlength="500"></textarea>
+<div class="grid"><div><label for="category">カテゴリ</label><select id="category"><option value="">指定なし</option></select></div><div><label for="publishAt">公開予定日時（日本時間）</label><input id="publishAt" type="datetime-local"></div></div>
+<label><input id="pinned" type="checkbox" style="display:inline;width:auto"> 重要なお知らせ（先頭固定）</label>
+<label id="editorLabel">本文（リッチテキスト）</label>
+<div class="toolbar" aria-label="書式ツールバー"><button type="button" data-command="bold" aria-label="太字"><b>B</b></button><button type="button" data-command="italic" aria-label="斜体"><i>I</i></button><button type="button" data-command="underline" aria-label="下線"><u>U</u></button><button type="button" data-command="insertUnorderedList">箇条書き</button><button type="button" data-command="insertOrderedList">番号付き</button><button type="button" id="linkBtn">リンク</button></div>
+<div id="editor" class="editor" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="editorLabel" spellcheck="true"></div>
+<p class="muted">貼り付けたHTMLは保存・プレビュー時に許可タグだけを残します。画像は記事保存後に非公開Storageへ添付します。</p><label for="imageUpload">添付画像（JPEG / PNG / WebP、5MB以下）</label><input id="imageUpload" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" id="uploadImage">画像をアップロード</button><p id="imageStatus" class="muted" role="status" aria-live="polite"></p><div id="mediaList" class="list"></div>
+<div class="toolbar"><button type="button" id="previewBtn">プレビュー</button><button type="submit" data-mode="draft">下書き保存</button><button type="submit" data-mode="publish">公開・予約設定して保存</button><button type="button" id="archiveBtn" disabled>アーカイブ</button></div>
+</form><p id="saveMessage" role="status" aria-live="polite"></p></section>
+<section class="panel" id="historyPanel" hidden><h2>改訂履歴・操作ログ</h2><div class="grid"><div><h3>改訂履歴</h3><div id="revisionList" class="list"></div></div><div><h3>操作ログ</h3><div id="auditList" class="list"></div></div></div></section><section id="previewPanel" class="panel" hidden><h2>プレビュー（管理者のみ）</h2><div class="preview"><h2 id="previewTitle"></h2><div id="previewBody"></div></div></section>
+</main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script><script type="module">
+import {createClient} from './news-client.js?v=2.25.6';
+const sb=createClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe');
+const $=id=>document.getElementById(id);
+let currentUser=null,currentId=null,articles=[],busy=false,currentUpdatedAt=null;
+function setBusy(value){
+ busy=value;
+ $('workspace').setAttribute('aria-busy',String(value));
+ $('workspace').querySelectorAll('button,input,select,textarea').forEach(el=>el.disabled=value);
+ $('editor').contentEditable=String(!value);
+ $('archiveBtn').disabled=value||!currentId;
+}
+
+const allowed=new Set(['P','DIV','BR','STRONG','B','EM','I','U','UL','OL','LI','H2','H3','BLOCKQUOTE','A']);
+function safeHtml(input){
+ const parsed=new DOMParser().parseFromString('<div>'+String(input||'')+'</div>','text/html');
+ const root=document.createElement('div');
+ function walk(src,dst){
+  for(const node of src.childNodes){
+   if(node.nodeType===Node.TEXT_NODE){dst.appendChild(document.createTextNode(node.textContent));continue}
+   if(node.nodeType!==Node.ELEMENT_NODE)continue;
+   const tag=node.tagName;
+   if(['SCRIPT','STYLE','IFRAME','OBJECT','EMBED','SVG','MATH','FORM','IMG'].includes(tag))continue;
+   const el=allowed.has(tag)?document.createElement(tag.toLowerCase()):document.createDocumentFragment();
+   if(tag==='A'){
+    try{const u=new URL(node.getAttribute('href')||'',location.href);if(u.protocol==='https:'||u.protocol==='http:'){el.setAttribute('href',u.href);el.setAttribute('rel','noopener noreferrer');el.setAttribute('target','_blank')}}catch{}
+   }
+   walk(node,el);dst.appendChild(el);
+  }
+ }
+ walk(parsed.body.firstElementChild,root);
+ return root.innerHTML;
+}
+function nextUpdatedAt(){
+ const previous=currentUpdatedAt?Date.parse(currentUpdatedAt):0;
+ return new Date(Math.max(Date.now(),previous+1)).toISOString();
+}
+function assertEditableVersion(){
+ if(currentId&&(!currentUpdatedAt||!Number.isFinite(Date.parse(currentUpdatedAt))))throw Error('更新情報を取得できません。一覧更新から記事を開き直してください');
+}
+function assertWriteResult(result){
+ if(result.error)throw result.error;
+ if(!result.data)throw Error('記事が更新・削除されたか、編集権限が変更されました。入力内容を控え、一覧更新から記事を開き直してください');
+}
+function message(text,error=false){$('saveMessage').textContent=text;$('saveMessage').className=error?'error':'success'}
+function dateLocal(value){if(!value)return '';const d=new Date(value);if(Number.isNaN(d.getTime()))return '';const fmt=new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Tokyo',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});return fmt.format(d).replace(' ','T')}
+function localToIso(value){if(!value)return null;const d=new Date(value+':00+09:00');if(Number.isNaN(d.getTime()))throw Error('公開日時が不正です');return d.toISOString()}
+function clearForm(){$('articleForm').reset();$('editor').replaceChildren();currentId=null;currentUpdatedAt=null;$('formHeading').textContent='新規記事';$('archiveBtn').disabled=true;message('');$('previewPanel').hidden=true;$('historyPanel').hidden=true;$('mediaList').replaceChildren();$('imageStatus').textContent=''}
+function populate(a){if(busy)return;currentId=a.id;currentUpdatedAt=a.updated_at;$('formHeading').textContent='記事編集';$('title').value=a.title;$('slug').value=a.slug;$('excerpt').value=a.excerpt||'';$('category').value=a.category_id||'';$('pinned').checked=!!a.is_pinned;$('publishAt').value=dateLocal(a.published_at||a.scheduled_at);$('editor').innerHTML=safeHtml(a.body_json?.html||'');$('archiveBtn').disabled=false;$('previewPanel').hidden=true;message('');void Promise.all([loadHistory(),loadMedia()]);$('articleForm').scrollIntoView({behavior:'smooth'})}
+async function refresh(){
+ const {data,error}=await sb.from('news_articles').select('id,title,slug,status,published_at,scheduled_at,is_pinned,category_id,excerpt,body_json,deleted_at,updated_at').is('deleted_at',null).order('created_at',{ascending:false}).limit(100);
+ if(error){$('articles').textContent='一覧取得エラー: '+error.message;return}
+ articles=data||[];$('articles').replaceChildren();
+ if(!articles.length){$('articles').textContent='記事はありません';return}
+ for(const a of articles){const item=document.createElement('div');item.className='item';const info=document.createElement('div');const title=document.createElement('strong');title.textContent=a.title;const meta=document.createElement('small');meta.textContent=a.status+' / '+(a.published_at?dateLocal(a.published_at):'未公開')+(a.is_pinned?' / 重要':'');info.append(title,meta);const btn=document.createElement('button');btn.type='button';btn.textContent='編集';btn.disabled=busy;btn.onclick=()=>populate(a);item.append(info,btn);$('articles').append(item)}
+}
+async function loadCategories(){
+ const {data,error}=await sb.from('news_categories').select('id,name').order('sort_order');
+ if(error){message('カテゴリ取得エラー: '+error.message,true);return}
+ $('category').replaceChildren(new Option('指定なし',''));
+ for(const c of data||[])$('category').append(new Option(c.name,c.id))
+}
+async function checkAuth(){
+ const {data:{user},error}=await sb.auth.getUser();
+ const roleResult=!error&&user?await sb.rpc('current_official_role'):{data:null,error:true};
+ currentUser=!error&&!roleResult.error&&['admin','super_admin'].includes(roleResult.data)?user:null;
+ $('workspace').hidden=!currentUser;$('login').hidden=!!currentUser;
+ $('identity').textContent=currentUser?(currentUser.email||'管理者'):'';
+ $('status').textContent=currentUser?'管理者認証済み':'管理者アカウントでログインしてください';
+ if(currentUser){await Promise.all([refresh(),loadCategories()])}
+}
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){$('status').textContent='ログインに失敗しました';return}await checkAuth()});
+$('logout').onclick=async()=>{await sb.auth.signOut();currentUser=null;location.reload()};
+$('reload').onclick=refresh;$('newArticle').onclick=()=>{if(!busy)clearForm()};
+document.querySelectorAll('[data-command]').forEach(btn=>btn.addEventListener('click',()=>{$('editor').focus();document.execCommand(btn.dataset.command,false,null)}));
+$('linkBtn').onclick=()=>{const url=prompt('https:// で始まるリンク先URL');if(!url)return;try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))throw Error();$('editor').focus();document.execCommand('createLink',false,u.href)}catch{message('http/httpsのURLのみ指定できます',true)}};
+$('editor').addEventListener('paste',e=>{e.preventDefault();const text=e.clipboardData?.getData('text/plain')||'';document.execCommand('insertText',false,text)});
+$('previewBtn').onclick=()=>{$('previewTitle').textContent=$('title').value||'無題';$('previewBody').innerHTML=safeHtml($('editor').innerHTML);$('previewPanel').hidden=false;$('previewPanel').scrollIntoView({behavior:'smooth'})};
+$('articleForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(!currentUser||busy)return;
+ const mode=e.submitter?.dataset.mode||'draft';
+ const title=$('title').value.trim(),slug=$('slug').value.trim();
+ if(!title||!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){message('タイトルとURL識別子を確認してください',true);return}
+ const clean=safeHtml($('editor').innerHTML);
+ if(!clean.replace(/<[^>]*>/g,'').trim()){message('本文を入力してください',true);return}
+ let when=null;try{when=localToIso($('publishAt').value)}catch(err){message(err.message,true);return}
+ if(mode==='publish'&&!when)when=new Date().toISOString();
+ try{assertEditableVersion()}catch(err){message(err.message,true);return}
+ const now=nextUpdatedAt(),scheduled=mode==='publish'&&new Date(when)>new Date();
+ const payload={title,slug,excerpt:$('excerpt').value.trim(),body_json:{format:'safe-html-v1',html:clean},category_id:$('category').value||null,is_pinned:$('pinned').checked,status:mode==='draft'?'draft':'published',published_at:mode==='draft'?null:when,scheduled_at:scheduled?when:null,updated_by:currentUser.id,updated_at:now};
+ setBusy(true);message('保存中…');
+ try{
+  const result=currentId?await sb.from('news_articles').update(payload).eq('id',currentId).eq('updated_at',currentUpdatedAt).is('deleted_at',null).select('id,updated_at').maybeSingle():await sb.from('news_articles').insert({...payload,created_by:currentUser.id}).select('id,updated_at').single();
+  assertWriteResult(result);
+  currentId=result.data.id;currentUpdatedAt=result.data.updated_at;await Promise.all([loadHistory(),loadMedia()]);
+  message(mode==='draft'?'下書きを保存しました':scheduled?'予約投稿を保存しました':'記事を公開状態で保存しました');
+  await refresh();
+ }catch(err){message('保存に失敗しました: '+(err.message||'不明なエラー'),true)}
+ finally{setBusy(false)}
+});
+async function loadHistory(){
+ if(!currentId)return;
+ const [revisions,logs]=await Promise.all([
+  sb.from('news_article_revisions').select('revision_no,edited_by,created_at').eq('article_id',currentId).order('revision_no',{ascending:false}).limit(30),
+  sb.from('news_audit_logs').select('action,actor_id,created_at').eq('article_id',currentId).order('created_at',{ascending:false}).limit(30)
+ ]);
+ $('historyPanel').hidden=false;
+ for(const [target,result,render] of [
+  ['revisionList',revisions,r=>'改訂 '+r.revision_no+' / '+new Date(r.created_at).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})],
+  ['auditList',logs,r=>r.action+' / '+new Date(r.created_at).toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})]
+ ]){
+  $(target).replaceChildren();if(result.error){$(target).textContent='取得エラー: '+result.error.message;continue}
+  for(const row of result.data||[]){const div=document.createElement('div');div.className='item';div.textContent=render(row);$(target).append(div)}
+  if(!result.data?.length)$(target).textContent='履歴はありません';
+ }
+}
+async function loadMedia(){
+ if(!currentId)return;
+ const {data,error}=await sb.from('news_media').select('id,storage_path,mime_type,size_bytes').eq('article_id',currentId).order('created_at',{ascending:false});
+ $('mediaList').replaceChildren();if(error){$('imageStatus').textContent='画像一覧の取得に失敗しました: '+error.message;return}
+ for(const m of data||[]){
+  const div=document.createElement('div');div.className='item';const name=document.createElement('span');name.textContent=m.storage_path.split('/').pop()+' / '+Math.ceil(m.size_bytes/1024)+' KB';
+  const btn=document.createElement('button');btn.type='button';btn.textContent='管理者プレビュー';btn.onclick=async()=>{
+   const {data:link,error:err}=await sb.storage.from('news-images').createSignedUrl(m.storage_path,60);
+   if(err){$('imageStatus').textContent='画像表示エラー: '+err.message;return}
+   const a=document.createElement('a');a.href=link.signedUrl;a.target='_blank';a.rel='noopener noreferrer';a.textContent='60秒間有効な画像を開く';div.querySelector('a')?.remove();div.append(a);
+  };div.append(name,btn);$('mediaList').append(div)
+ }
+ if(!data?.length)$('mediaList').textContent='添付画像はありません';
+}
+$('uploadImage').onclick=async()=>{
+ if(busy||!currentUser)return;
+ if(!currentId){$('imageStatus').textContent='先に記事を下書き保存してください';return}
+ const file=$('imageUpload').files?.[0];if(!file){$('imageStatus').textContent='画像を選択してください';return}
+ if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<1||file.size>5242880){$('imageStatus').textContent='JPEG・PNG・WebP、5MB以下の画像のみアップロードできます';return}
+ const extension={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type];
+ const articleId=currentId;
+ const path=articleId+'/'+crypto.randomUUID()+'.'+extension;
+ setBusy(true);$('imageStatus').textContent='アップロード中…';
+ try{
+  const {error:uploadError}=await sb.storage.from('news-images').upload(path,file,{contentType:file.type,upsert:false});if(uploadError)throw uploadError;
+  const {error:dbError}=await sb.from('news_media').insert({article_id:articleId,storage_path:path,mime_type:file.type,size_bytes:file.size});
+  if(dbError){await sb.storage.from('news-images').remove([path]);throw dbError}
+  $('imageStatus').textContent='画像を添付しました。公開済み記事では画像が表示されます。公開前の記事の画像は非公開です。';$('imageUpload').value='';await loadMedia();
+ }catch(err){$('imageStatus').textContent='アップロード失敗: '+(err.message||'不明なエラー')}
+ finally{setBusy(false)}
+};
+$('archiveBtn').onclick=async()=>{
+ if(busy||!currentUser||!currentId||!confirm('この記事をアーカイブしますか？'))return;
+ const articleId=currentId,actorId=currentUser.id;
+ setBusy(true);
+ try{
+  assertEditableVersion();
+  const result=await sb.from('news_articles').update({status:'archived',deleted_at:new Date().toISOString(),updated_by:actorId,updated_at:nextUpdatedAt()}).eq('id',articleId).eq('updated_at',currentUpdatedAt).is('deleted_at',null).select('id,updated_at').maybeSingle();
+  assertWriteResult(result);
+  clearForm();await refresh();
+ }catch(err){message('アーカイブに失敗しました: '+(err.message||'不明なエラー'),true)}
+ finally{setBusy(false)}
+};
+sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;$('workspace').hidden=true;$('login').hidden=false}});
+await checkAuth();
+</script></body></html>
