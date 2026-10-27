@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com 'sha256-mwU1W2sgKMBqDOgJ1OOjhj3cfuB1U31/MdlXYnTUDvE='; script-src-attr 'none'; style-src 'self' 'sha256-C20WEHvmY/uO9J+suLW6Wc9Yd0N4G+B5EkUVrUNLjwQ='; style-src-attr 'none'; img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co; font-src 'self' data:; connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="version" content="2.25.6">
+<html lang="ja"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com 'sha256-xPPf+670AxtVALJ9RMkKd6fiUjU8sBmGi5XmzLppWq8='; script-src-attr 'none'; style-src 'self' 'sha256-C20WEHvmY/uO9J+suLW6Wc9Yd0N4G+B5EkUVrUNLjwQ='; style-src-attr 'none'; img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co; font-src 'self' data:; connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="version" content="2.25.7">
 <meta name="description" content="VOCALINK-TEAMのお知らせ・最新情報"><title>NEWS | VOCALINK-TEAM</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,"Noto Sans JP",sans-serif;background:#10100f;color:#eeeae2}
@@ -22,7 +22,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{ou
 <div class="pagination"><button type="button" id="previous" disabled>前のページ</button><span id="pageLabel" class="muted"></span><button type="button" id="next" disabled>次のページ</button></div>
 </main><footer><div class="wrap">© 2026 VOCALINK-TEAM · <a href="index.html">トップページへ</a></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script><script type="module">
-import {sb,articleCard} from './news-public.js?v=2.25.6';
+import {sb,articleCard} from './news-public.js?v=2.25.7';
 const $=id=>document.getElementById(id),params=new URLSearchParams(location.search);
 const perPage=12,categories=new Map();let page=Math.max(1,Math.min(10000,Number(params.get('page'))||1)),total=0;
 $('keyword').value=(params.get('q')||'').slice(0,60);

@@ -1,5 +1,5 @@
 // NEWS-001 public renderer. The database RLS is the authoritative publication boundary.
-import {createClient} from './news-client.js?v=2.25.6';
+import {createClient} from './news-client.js?v=2.25.7';
 export const sb=createClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 export const formatJst=value=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
 const allowed=new Set(['P','DIV','BR','STRONG','B','EM','I','U','UL','OL','LI','H2','H3','BLOCKQUOTE','A']);

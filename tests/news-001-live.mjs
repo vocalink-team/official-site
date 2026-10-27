@@ -66,10 +66,11 @@ try {
   await page.locator('#loginForm button').click();
   await check('real administrator login',async()=>page.locator('#workspace').waitFor({state:'visible'}));
   await page.evaluate(async ({api,key})=>{
-    const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+    const {createClient}=window.supabase;
     window.__newsLiveClient=createClient(api,key);
     const {data,error}=await window.__newsLiveClient.auth.getUser();
-    if(error || !['admin','super_admin'].includes(data.user?.app_metadata?.role))throw new Error('Administrator verification failed');
+    const roleResult=!error&&data.user?await window.__newsLiveClient.rpc('current_official_role'):{data:null,error:true};
+    if(error||roleResult.error||!['admin','super_admin'].includes(roleResult.data))throw new Error('Administrator verification failed');
   },{api,key});
   clientReady=true;
   await page.locator('#title').fill('[動作確認] NEWS自動テスト '+slug);
