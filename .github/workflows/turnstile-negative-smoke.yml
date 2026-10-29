@@ -1,0 +1,86 @@
+name: Turnstile API negative smoke test
+on:
+  push:
+    branches:
+      - test/turnstile-browser-smoke-20261023
+    paths:
+      - .github/workflows/turnstile-negative-smoke.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/turnstile-negative-smoke.yml
+  workflow_dispatch:
+jobs:
+  negative-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reject missing and invalid tokens without creating applications
+        shell: bash
+        env:
+          ENDPOINT: https://qvxoxrzvxyyribqjnpkb.supabase.co/functions/v1/submit-team-application-secure
+        run: |
+          set -euo pipefail
+          payload='{"name":"Negative API test","email":"negative-test@example.invalid","role":"その他","motivation":"No database insertion expected","consent":true}'
+          for case in missing invalid; do
+            if [[ "$case" == invalid ]]; then
+              body='{"name":"Negative API test","email":"negative-test@example.invalid","role":"その他","motivation":"No database insertion expected","consent":true,"turnstile_token":"invalid-test-token"}'
+            else
+              body="$payload"
+            fi
+            status=$(curl --fail-with-body --silent --show-error --max-time 15 -o /tmp/response.json -w '%{http_code}' \
+              -H 'Origin: https://vocalink-team.github.io' \
+              -H 'Content-Type: application/json' \
+              -X POST "$ENDPOINT" -d "$body") || {
+                code=$?
+                if [[ "$code" != 22 ]]; then echo "Network/API error"; exit "$code"; fi
+              }
+            echo "$case token: HTTP $status"
+            if [[ "$status" != 403 ]]; then
+              echo "Expected 403"; cat /tmp/response.json; exit 1
+            fi
+          done
+          echo 'Both negative tests passed'
+          # Confirm disallowed origins cannot submit, even with a token.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/origin.json -w '%{http_code}' \
+            -H 'Origin: https://attacker.invalid' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" -d "$payload")
+          echo "disallowed origin: HTTP $status"
+          test "$status" = 403
+
+          # Confirm unsupported methods are rejected.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/method.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -X GET "$ENDPOINT")
+          echo "GET method: HTTP $status"
+          test "$status" = 405
+
+          # Confirm malformed JSON is rejected before any insertion.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/json.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" -d '{broken-json')
+          echo "malformed JSON: HTTP $status"
+          test "$status" = 400
+
+          echo 'Extended negative tests passed'
+          # Reject requests that omit Origin entirely.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/no-origin.json -w '%{http_code}' \
+            -H 'Content-Type: application/json' -X POST "$ENDPOINT" -d "$payload")
+          echo "missing origin: HTTP $status"
+          test "$status" = 403
+
+          # Reject missing required consent before reaching Turnstile.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/consent.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" -d '{"name":"Test","email":"test@example.invalid","role":"その他","motivation":"Test","consent":false,"turnstile_token":"invalid"}')
+          echo "missing consent: HTTP $status"
+          test "$status" = 400
+
+          # Confirm the server enforces the declared maximum request size.
+          status=$(curl --silent --show-error --max-time 15 -o /tmp/size.json -w '%{http_code}' \
+            -H 'Origin: https://vocalink-team.github.io' -H 'Content-Type: application/json' \
+            -X POST "$ENDPOINT" --data-binary @<(printf '%17000s' ' '))
+          echo "oversized body: HTTP $status"
+          test "$status" = 413
+
+          echo 'Additional boundary tests passed'
