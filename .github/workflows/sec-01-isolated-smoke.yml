@@ -1,5 +1,9 @@
 name: SEC-01 isolated unauthenticated API smoke test
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/sec-01-isolated-smoke.yml'
+      - 'supabase/functions/team-member-invite/index.ts'
   workflow_dispatch:
 
 permissions:
