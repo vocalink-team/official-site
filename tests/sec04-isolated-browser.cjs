@@ -53,16 +53,14 @@ async function main() {
     try {
       await page.goto(origin + '/request.html', { waitUntil: 'domcontentloaded' })
       for (let index = 1; index <= 4; index++) {
-        if (index <= 3) {
-          await page.locator('#category').selectOption({ label: 'その他' })
-          await page.locator('[data-next="2"]').click()
-          await page.locator('#title').fill('SEC-04 browser verification ' + index)
-          await page.locator('#description').fill('Synthetic browser-to-database request')
-          await page.locator('[data-next="3"]').click()
-          await page.locator('#name').fill('SEC-04 browser verification')
-          await page.locator('#email').fill(email)
-          await page.locator('#agree').check()
-        }
+        await page.locator('#category').selectOption({ label: 'その他' })
+        await page.locator('[data-next="2"]').click()
+        await page.locator('#title').fill('SEC-04 browser verification ' + index)
+        await page.locator('#description').fill('Synthetic browser-to-database request')
+        await page.locator('[data-next="3"]').click()
+        await page.locator('#name').fill('SEC-04 browser verification')
+        await page.locator('#email').fill(email)
+        await page.locator('#agree').check()
         await page.waitForFunction(() => Array.from(document.querySelectorAll('input[name="cf-turnstile-response"]'))
           .some((input) => input.value.length > 0), undefined, { timeout: 45000 })
         const response = page.waitForResponse((entry) => entry.url() === endpoint && entry.request().method() === 'POST')
