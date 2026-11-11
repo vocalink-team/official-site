@@ -2,6 +2,8 @@ name: SEC-01 regression checks
 on:
   pull_request:
     paths:
+      - 'supabase/functions/admin-security-test-v4/**'
+      - 'tests/sec-02-admin-security-test.cjs'
       - 'supabase/functions/team-member-invite/**'
       - 'tests/sec-01-super-admin.cjs'
       - 'tests/sec-01-request-mock.cjs'
@@ -24,5 +26,5 @@ jobs:
         run: node --test tests/sec-01-super-admin.cjs
       - name: Run request-handler tests with mocked Supabase
         run: node --test tests/sec-01-request-mock.cjs
-      - name: Run official-site existing Node tests
+      - name: Run official-site Node test suite
         run: npm test
