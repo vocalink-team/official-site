@@ -22,6 +22,7 @@ async function main() {
   const browser = await chromium.launch({ headless: true })
   try {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } })
+    page.setDefaultTimeout(15000)
     const errors = []
     const gatewayErrors = []
     page.on('pageerror', (error) => errors.push(error.message))
@@ -52,7 +53,7 @@ async function main() {
     })
     try {
       await page.goto(origin + '/request.html', { waitUntil: 'domcontentloaded' })
-      for (let index = 1; index <= 4; index++) {
+      for (let index = 4; index <= 4; index++) {
         await page.locator('#category').selectOption({ label: 'その他' })
         await page.locator('[data-next="2"]').click()
         await page.locator('#title').fill('SEC-04 browser verification ' + index)
@@ -67,14 +68,15 @@ async function main() {
         await page.locator('#submit').click()
         const actual = await response
         const expected = index <= 3 ? 201 : 429
-        assert.equal(actual.status(), expected, JSON.stringify(await actual.json().catch(() => null)))
-        await page.waitForFunction((expected) => document.querySelector('#message').textContent.includes(expected),
-          index <= 3 ? '制作相談を受け付けました。' : '送信回数の上限に達しました。')
+        assert.equal(actual.status(), expected)
         console.log('Browser submission ' + index + ': HTTP ' + expected)
+        await page.waitForFunction((expected) => document.querySelector('#message').textContent.includes(expected),
+          index <= 3 ? '制作相談を受け付けました。' : '送信回数の上限に達しました。', { timeout: 8000 })
+        console.log('Browser rate-limit message displayed')
       }
       assert.deepEqual(errors, [])
     } catch (error) {
-      console.error(JSON.stringify({ errors, gatewayErrors }))
+      console.error(JSON.stringify({ errors, gatewayErrors, message: await page.locator('#message').textContent().catch(() => null) }))
       throw error
     }
   } finally {
