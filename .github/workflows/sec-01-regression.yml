@@ -1,0 +1,25 @@
+name: SEC-01 regression checks
+on:
+  pull_request:
+    paths:
+      - 'supabase/functions/team-member-invite/**'
+      - 'tests/sec-01-super-admin.cjs'
+      - '.github/workflows/sec-01-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run SEC-01 isolated regression tests
+        run: node --test tests/sec-01-super-admin.cjs
+      - name: Run official-site existing Node tests
+        run: npm test
