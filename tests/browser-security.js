@@ -146,16 +146,28 @@ const memoCases = ['', '\n先頭改行', '\n\n複数改行\n末尾\n', '</textar
     const embed = await browser.newPage();
     try {
       const parent = 'http://localhost:3000/sec05-embedding-probe';
+      const control = 'http://127.0.0.1:3000/sec05-unprotected-control';
+      const admin = 'http://127.0.0.1:3000/admin.html';
+      await embed.route(control, route => route.fulfill({
+        contentType: 'text/html', body: '<p id="sec05-control">Cross-origin control</p>'
+      }));
       await embed.route(parent, route => route.fulfill({
         contentType: 'text/html',
-        body: '<iframe src="http://127.0.0.1:3000/admin.html"></iframe>'
+        body: '<iframe id="control" src="' + control + '"></iframe><iframe id="protected" src="' + admin + '"></iframe>'
       }));
-      const refused = embed.waitForEvent('console', {
-        predicate: message => message.text().includes('frame-ancestors') && message.text().includes('127.0.0.1:3000'),
-        timeout: 10000
+      const failures = [];
+      embed.on('requestfailed', request => {
+        if (request.url() === admin) failures.push(request.failure()?.errorText);
       });
-      await Promise.all([embed.goto(parent), refused]);
-      assert.equal(embed.frames().some(frame => frame.url().endsWith('/admin.html')), false);
+      await embed.goto(parent, { waitUntil: 'load' });
+      await embed.frameLocator('#control').locator('#sec05-control').waitFor({ timeout: 10000 });
+      const protectedFrame = await (await embed.locator('#protected').elementHandle()).contentFrame();
+      assert.ok(protectedFrame, 'Protected iframe exists');
+      const protectedUrl = protectedFrame.url();
+      assert.notEqual(protectedUrl, admin, 'Admin document must not load in the iframe');
+      assert.ok(protectedUrl.startsWith('chrome-error:') ||
+        failures.some(error => error?.includes('ERR_BLOCKED_BY_RESPONSE')),
+      'Chromium must report a blocked response, got ' + JSON.stringify({ protectedUrl, failures }));
       console.log('PASS SEC-05 cross-origin admin iframe blocked');
     } finally {
       await embed.close();
