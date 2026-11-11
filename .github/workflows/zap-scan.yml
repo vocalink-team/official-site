@@ -4,6 +4,7 @@ on: [push] # コードがプッシュされたら自動実行
 jobs:
   zap_scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     name: Scan the webapplication
     steps:
       - name: Checkout
@@ -12,12 +13,18 @@ jobs:
       - name: Start local static site for the scanner
         run: |
           node tools/build-public.cjs
-          python3 tools/serve-static.py --directory _site --bind 0.0.0.0 > /tmp/official-site-http.log 2>&1 &
+          python3 tools/serve-static.py --directory _site --bind 0.0.0.0 --preview-header-rule security/sec05-response-header-rule.json > /tmp/official-site-http.log 2>&1 &
           python3 - <<'PYREADY'
-          import time, urllib.request
+          import json, time, urllib.request
+          with open('security/sec05-response-header-rule.json', encoding='utf-8') as file:
+              expected = json.load(file)['action_parameters']['headers']
           for attempt in range(30):
               try:
-                  urllib.request.urlopen('http://localhost:3000/', timeout=1).close()
+                  with urllib.request.urlopen('http://localhost:3000/', timeout=1) as response:
+                      for name, setting in expected.items():
+                          if response.headers.get(name) != setting['value']:
+                              raise SystemExit(f'Scanner target missing expected header: {name}')
+                  print('SEC-05 response headers confirmed on scanner target')
                   break
               except OSError:
                   time.sleep(0.2)
