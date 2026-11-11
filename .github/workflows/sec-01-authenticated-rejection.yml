@@ -1,0 +1,61 @@
+name: SEC-01 isolated authenticated rejection checks
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rejected-operations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    environment: security-test
+    env:
+      SUPABASE_URL: https://ktzcjyyesyewbzvrwngx.supabase.co
+      SUPABASE_ANON_KEY: ${{ secrets.SEC01_TEST_ANON_KEY }}
+      TEST1_PASSWORD: ${{ secrets.SEC01_TEST1_PASSWORD }}
+      TEST2_PASSWORD: ${{ secrets.SEC01_TEST2_PASSWORD }}
+      TEST3_PASSWORD: ${{ secrets.SEC01_TEST3_PASSWORD }}
+    steps:
+      - name: Verify credentials configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          for variable in SUPABASE_ANON_KEY TEST1_PASSWORD TEST2_PASSWORD TEST3_PASSWORD; do
+            if [ -z "${!variable}" ]; then echo "::error::Missing secret: $variable"; exit 1; fi
+          done
+      - name: Run non-mutating rejection checks A D E
+        shell: bash
+        run: |
+          set -euo pipefail
+          login() {
+            local email="$1" password="$2" response token
+            response="$(curl --silent --show-error --fail-with-body --max-time 20 \
+              --request POST "$SUPABASE_URL/auth/v1/token?grant_type=password" \
+              --header "apikey: $SUPABASE_ANON_KEY" \
+              --header 'Content-Type: application/json' \
+              --data "$(jq -nc --arg e "$email" --arg p "$password" '{email:$e,password:$p}')")"
+            token="$(jq -r '.access_token // empty' <<< "$response")"
+            if [ -z "$token" ]; then echo "::error::No access token for test user" >&2; return 1; fi
+            printf '%s' "$token"
+          }
+          assert_rejected() {
+            local label="$1" token="$2" email="$3" role="$4" status bodyfile
+            bodyfile="$(mktemp)"
+            status="$(curl --silent --show-error --max-time 20 \
+              --output "$bodyfile" --write-out '%{http_code}' \
+              --request POST "$SUPABASE_URL/functions/v1/team-member-invite" \
+              --header "apikey: $SUPABASE_ANON_KEY" \
+              --header "Authorization: Bearer $token" \
+              --header 'Content-Type: application/json' \
+              --data "$(jq -nc --arg e "$email" --arg r "$role" '{email:$e,display_name:"SEC01 rejection check",role_key:$r}')")"
+            rm -f "$bodyfile"
+            echo "$label HTTP status: $status"
+            if [ "$status" != 403 ]; then echo "::error::$label expected HTTP 403, got $status"; return 1; fi
+          }
+          admin_token="$(login 'test2@gmail.com' "$TEST2_PASSWORD")"
+          suspended_token="$(login 'test3@gmail.com' "$TEST3_PASSWORD")"
+          assert_rejected 'A admin cannot downgrade super_admin' "$admin_token" 'test1@gmail.com' 'viewer'
+          assert_rejected 'D suspended admin cannot modify viewer' "$suspended_token" 'test4@gmail.com' 'viewer'
+          assert_rejected 'E admin cannot invite super_admin' "$admin_token" 'sec01-never-send@example.invalid' 'super_admin'
+          echo 'A D E returned 403. Confirm DB unchanged separately before final signoff.'
