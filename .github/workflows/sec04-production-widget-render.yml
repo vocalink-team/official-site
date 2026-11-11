@@ -1,0 +1,19 @@
+name: SEC-04 production widget render check
+on:
+  push:
+    branches: ['qa/sec04-production-widget-render']
+permissions:
+  contents: read
+jobs:
+  widget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: node tests/sec04-production-widget-render.cjs
