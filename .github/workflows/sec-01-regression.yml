@@ -4,6 +4,7 @@ on:
     paths:
       - 'supabase/functions/team-member-invite/**'
       - 'tests/sec-01-super-admin.cjs'
+      - 'tests/sec-01-request-mock.cjs'
       - '.github/workflows/sec-01-regression.yml'
   workflow_dispatch:
 
@@ -21,5 +22,7 @@ jobs:
           node-version: '22'
       - name: Run SEC-01 isolated regression tests
         run: node --test tests/sec-01-super-admin.cjs
+      - name: Run request-handler tests with mocked Supabase
+        run: node --test tests/sec-01-request-mock.cjs
       - name: Run official-site existing Node tests
         run: npm test
