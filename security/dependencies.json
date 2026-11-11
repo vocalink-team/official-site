@@ -6,6 +6,7 @@
   },
   "turnstile": {
     "url": "https://challenges.cloudflare.com/turnstile/v0/api.js",
+    "explicitUrl": "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",
     "integrity": null,
     "reason": "Provider-managed dynamic script; keep the canonical URL."
   }
