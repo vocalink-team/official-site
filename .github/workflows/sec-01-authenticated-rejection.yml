@@ -1,11 +1,6 @@
 name: SEC-01 isolated authenticated rejection checks
 on:
   workflow_dispatch:
-  pull_request:
-    branches: [main]
-    types: [synchronize]
-    paths:
-      - '.github/workflows/sec-01-authenticated-rejection.yml'
 
 permissions:
   contents: read
@@ -14,12 +9,7 @@ jobs:
   rejected-operations:
     if: >-
       github.repository == 'vocalink-team/official-site' &&
-      ((github.event_name == 'pull_request' &&
-        github.event.pull_request.number == 9 &&
-        github.event.pull_request.head.repo.full_name == github.repository &&
-        github.head_ref == 'security/sec-20261111-super-admin-protection') ||
-       (github.event_name == 'workflow_dispatch' &&
-        github.ref == 'refs/heads/security/sec-20261111-super-admin-protection'))
+      github.ref == 'refs/heads/security/sec-20261111-super-admin-protection'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     environment: security-test
