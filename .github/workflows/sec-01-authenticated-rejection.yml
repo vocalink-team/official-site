@@ -1,12 +1,25 @@
 name: SEC-01 isolated authenticated rejection checks
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    types: [synchronize]
+    paths:
+      - '.github/workflows/sec-01-authenticated-rejection.yml'
 
 permissions:
   contents: read
 
 jobs:
   rejected-operations:
+    if: >-
+      github.repository == 'vocalink-team/official-site' &&
+      ((github.event_name == 'pull_request' &&
+        github.event.pull_request.number == 9 &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        github.head_ref == 'security/sec-20261111-super-admin-protection') ||
+       (github.event_name == 'workflow_dispatch' &&
+        github.ref == 'refs/heads/security/sec-20261111-super-admin-protection'))
     runs-on: ubuntu-latest
     timeout-minutes: 8
     environment: security-test
@@ -20,9 +33,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          missing=0
           for variable in SUPABASE_ANON_KEY TEST2_PASSWORD TEST3_PASSWORD; do
-            if [ -z "${!variable}" ]; then echo "::error::Missing secret: $variable"; exit 1; fi
+            if [ -z "${!variable}" ]; then
+              echo "::error::Missing environment value: $variable"
+              missing=1
+            fi
           done
+          exit "$missing"
       - name: Run non-mutating rejection checks A D E
         shell: bash
         run: |
@@ -39,7 +57,7 @@ jobs:
             printf '%s' "$token"
           }
           assert_rejected() {
-            local label="$1" token="$2" email="$3" role="$4" status bodyfile
+            local label="$1" token="$2" email="$3" role="$4" expected_error="$5" status bodyfile
             bodyfile="$(mktemp)"
             status="$(curl --silent --show-error --max-time 20 \
               --output "$bodyfile" --write-out '%{http_code}' \
@@ -48,13 +66,17 @@ jobs:
               --header "Authorization: Bearer $token" \
               --header 'Content-Type: application/json' \
               --data "$(jq -nc --arg e "$email" --arg r "$role" '{email:$e,display_name:"SEC01 rejection check",role_key:$r}')")"
-            rm -f "$bodyfile"
             echo "$label HTTP status: $status"
-            if [ "$status" != 403 ]; then echo "::error::$label expected HTTP 403, got $status"; return 1; fi
+            if [[ "$status" != 403 ]] || ! jq -e --arg expected "$expected_error" '.error == $expected' "$bodyfile" > /dev/null; then
+              rm -f "$bodyfile"
+              echo "::error::$label did not return the expected application-level denial"
+              return 1
+            fi
+            rm -f "$bodyfile"
           }
           admin_token="$(login 'test2@gmail.com' "$TEST2_PASSWORD")"
           suspended_token="$(login 'test3@gmail.com' "$TEST3_PASSWORD")"
-          assert_rejected 'A admin cannot downgrade super_admin' "$admin_token" 'test1@gmail.com' 'viewer'
-          assert_rejected 'D suspended admin cannot modify viewer' "$suspended_token" 'test4@gmail.com' 'viewer'
-          assert_rejected 'E admin cannot invite super_admin' "$admin_token" 'sec01-never-send@example.invalid' 'super_admin'
+          assert_rejected 'A admin cannot downgrade super_admin' "$admin_token" 'test1@gmail.com' 'viewer' '既存のSuper Adminを変更できるのはSuper Adminのみです。'
+          assert_rejected 'D suspended admin cannot modify viewer' "$suspended_token" 'test4@gmail.com' 'viewer' 'この操作を実行する権限がありません。'
+          assert_rejected 'E admin cannot invite super_admin' "$admin_token" 'sec01-never-send@example.invalid' 'super_admin' 'Super Adminへの招待はSuper Adminのみ実行できます。'
           echo 'A D E returned 403. Confirm DB unchanged separately before final signoff.'
