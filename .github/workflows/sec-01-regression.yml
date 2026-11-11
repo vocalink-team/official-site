@@ -2,6 +2,10 @@ name: SEC-01 regression checks
 on:
   pull_request:
     paths:
+      - 'request.html'
+      - 'supabase/functions/submit-service-request/**'
+      - 'supabase/sql/sec04_*.sql'
+      - 'tests/sec-04-service-request.cjs'
       - 'supabase/functions/_shared/security-admin.ts'
       - 'supabase/functions/security-alert-discord*/**'
       - 'tests/sec-03-discord-alert.cjs'
