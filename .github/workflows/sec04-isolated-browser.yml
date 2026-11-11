@@ -1,0 +1,19 @@
+name: SEC-04 isolated browser intake verification
+on:
+  push:
+    branches: ['qa/sec04-d3eb53a41a734fbd']
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx --no-install playwright install --with-deps chromium
+      - run: node tests/sec04-isolated-browser.cjs
