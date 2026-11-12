@@ -15,7 +15,7 @@ test('home initialization registers load and scope handlers without throwing', (
   const scripts = [...home.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)];
   const events = {}, nodes = {};
   for (const id of ['loader','loaderProgress','loaderPercent','scopeWrap','scope','aimX','aimY']) nodes[id] = {style:{},classList:{add(){}},addEventListener(k,fn){this[k]=fn},getBoundingClientRect(){return {left:0,top:0,width:400}}};
-  vm.runInNewContext(scripts.at(-1)[1], {document:{getElementById:id=>nodes[id],body:{classList:{remove(){}}}},window:{addEventListener:(k,fn)=>events[k]=fn},setTimeout(){},Math});
+  vm.runInNewContext(scripts.find(m=>m[1].includes("const loader=document.getElementById('loader')"))[1], {document:{getElementById:id=>nodes[id],body:{classList:{remove(){}}}},window:{addEventListener:(k,fn)=>events[k]=fn},setTimeout(){},Math});
   assert.equal(typeof events.load,'function');
   assert.equal(typeof nodes.scopeWrap.pointermove,'function');
   nodes.scopeWrap.pointermove({clientX:250,clientY:200});

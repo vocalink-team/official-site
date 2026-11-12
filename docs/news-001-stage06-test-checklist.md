@@ -1,0 +1,110 @@
+# NEWS-001 第06工程 リリース検証チェックリスト
+
+実施日: 2026-10-23 / 対象: Draft PR #7 / v2.25.4 開発ブランチ
+
+## 完了したDBレベルの確認
+- [x] 匿名RLS: 公開済みの記事のみSELECT可
+- [x] 匿名RLS: 下書き・公開前の記事はSELECT不可
+- [x] 匿名DB権限: NEWS記事INSERT不可
+- [x] 匿名DB権限: NEWS画像メタデータのSELECT/INSERT不可
+- [x] Storage: news-imagesは非公開
+- [x] Storage: news-imagesへの匿名読み取りポリシーなし
+- [x] 改訂履歴・監査ログ: トリガーによる生成をROLLBACKテストで確認
+- [x] NEWSメディアの所有記事ID・Storageパス整合性制約
+- [x] Edge Function news-public-media v1 を本番Supabaseへデプロイ（実HTTP試験は別項）
+
+## 自動ブラウザE2E（Supabaseモック使用）
+- [x] Chromiumで公開記事一覧・キーワード検索（Run 39938967690）
+- [x] Chromiumで記事詳細表示・危険なHTMLタグとjavascriptリンクの除去（同Run）
+- [x] Chromiumで存在しない記事を非表示（同Run）
+- [x] Chromiumで非管理者に編集フォームを非表示（同Run）
+- [x] Chromiumで管理者の下書き保存（モックDB、同Run）
+- [x] スマートフォン幅390pxで一覧・詳細の横スクロールなし（Chromium 7/7合格、Run 39940854217。実機ではない）
+
+## 実HTTP接続テスト（本番Supabase Edge Function）
+- [x] 不正な記事IDの画像一覧アクセスを404で拒否（Run 39940499406）
+- [x] 存在しない画像IDの取得を404で拒否（同Run）
+- [x] 存在しない記事IDの画像一覧を404で拒否（同Run）
+- [x] 実HTTPレスポンスの no-store / nosniff / CORS ヘッダを確認（Run 39940764982）
+- [ ] 下書き・予約前の記事に紐づく実画像への匿名アクセスを404で拒否
+- [ ] 公開済み記事の実画像を200・正しいContent-Typeで配信
+
+- [x] 本番Supabase REST: 匿名記事SELECT 200と公開条件検証（Run 39941385272）
+- [x] 本番Supabase REST: 匿名によるnews_media直接SELECTが401/403で拒否（同Run）
+- [ ] 実記事・実画像を使った公開／非公開の確認（現状記事0件・画像0件）
+
+## 公開前に実ブラウザで確認（本番接続・実機未実施）
+- [ ] 実Supabase接続でAdmin/SuperAdminログイン、一般ユーザーは編集不可
+- [ ] 下書き→編集→公開→アーカイブ→再閲覧不可
+- [ ] 予約日時前の非表示と日時到達後の自動表示（JST）
+- [ ] 画像アップロード（JPEG/PNG/WebP、5MB以下）と拒否ケース
+- [ ] 公開記事に画像が表示され、下書き・予約前の画像は404
+- [ ] 画像の実HTTPヘッダ（no-store、nosniff、Content-Type）
+- [ ] 改訂履歴・監査ログのUI表示と不正書き込み拒否
+- [ ] 実Supabase接続でHTML・SVG・イベント属性・javascript:リンクを入力しXSS不成立を確認（モックブラウザで一部確認済み）
+- [ ] 検索・カテゴリ・重要記事固定・ページ送りを実データで確認
+- [ ] iPad・スマートフォン・PCの表示、キーボード操作、読み上げ
+- [ ] ネットワークエラー、ログイン期限切れ、二重送信、公開時の競合
+- [ ] サイト全ページのバージョン表記・CSS/JSキャッシュキーをリリース対象バージョンへ統一
+- [ ] PRレビュー、CI、GitHub Pagesプレビュー、本番公開後の疎通
+
+## 判定
+**未検収・公開不可。** このチェックリストの未完了項目が解消するまでPRはDraftを維持する。
+
+## 2026-10-23 追加回帰検証
+- [x] ChromiumモックE2E **12/12合格**（既存7件＋追加5件）。
+- [x] 公開本文：SVG・iframe・MathML・イベント属性・難読化javascript/data URLの除去、安全な書式・HTTPSリンクの保持。
+- [x] 管理者プレビュー：危険なリンク・イベント属性の除去。
+- [x] 保存API拒否：入力内容保持・保存ボタン復旧・未保存状態維持。
+- [x] JST予約日時をUTCへ変換して保存するペイロードを確認。
+- [x] 未保存記事への画像添付を拒否。
+- [x] 同Runの実匿名REST・画像API拒否試験も合格。
+- 実行証跡: https://github.com/vocalink-team/official-site/actions/runs/39943092587
+- 試験対象コード: 78a9f9ea135463c2ac1f4e6f5c6349482c8c3020。その後のVERSION.json更新はメタデータのみ。
+- この試験は実ログイン、実画像配信、予約時刻到達時の実DB公開、通信切断、競合・期限切れ、実機確認の代替ではない。
+- 本番未公開・Draft維持。実ログイン試験のためのテスト用アカウント／セッションは本作業では確立していない。
+
+## 2026-10-23 操作競合・通信例外の修正検証（v2.25.3）
+- 保存中も記事切替が可能だったため、保存・画像転送・アーカイブ中は編集操作をロック。画像のarticle_idは転送開始時の値を保持。
+- アーカイブの例外を捕捉し、finallyで操作を復旧。0件更新を成功扱いしないよう単一行の返却を要求。
+- [x] 保存待機中の二重送信・記事切替を防止
+- [x] 保存の通信例外後に本文を保持し再試行可能
+- [x] 画像転送中の切替を防止し、Storageパスと記事IDの一致を確認
+- [x] アーカイブの通信例外後に入力内容・操作を復旧
+- [x] 既存12件を含むChromiumモックE2E **16/16合格**
+- [x] 同Runの実匿名REST・画像API拒否試験合格
+- 証跡: https://github.com/vocalink-team/official-site/actions/runs/39944876119
+- 対象コミット: b460e382373efea745af7f30a307689e625bbe5b
+- 画像転送試験はSDKモックの遅延を利用し、実Storageの画像検証とは区別する。
+- 複数管理者/タブでの同時編集、実ログイン期限切れ、実画像E2E、実機確認は未実施。
+- 実接続試験の準備と実行手順: docs/news-001-live-acceptance.md。
+
+## 2026-10-23 古い編集画面からの上書き防止（v2.25.4）
+- 保存・アーカイブのUPDATE条件に、取得時のupdated_atとdeleted_at IS NULLを追加。0件更新は入力を維持して再読込を案内。
+- 保存成功後はDB返却のupdated_atを保持。一覧更新だけで未保存フォームの更新日時を差し替えない。
+- 更新日時は同一ミリ秒の連続保存でも前回値より進める。更新情報が欠落している場合は保存を中止。
+- [x] 実DBの条件付き更新試験：最初の更新1件、古い値での保存0件、古い値でのアーカイブ0件、最新値での更新1件。
+- [x] DB試験をROLLBACKし、別照会でテスト記事残存0件を確認。
+- [x] Run 39947405798 の実匿名REST・画像API拒否試験合格。
+- [x] ChromiumモックE2E 19件（既存16＋追加3）。2026-10-26にRun 39947405798の完了とジョブログの `19 passed (9.2s)` を確認。
+- CI: https://github.com/vocalink-team/official-site/actions/runs/39947405798
+- 試験対象コミット: a497b430110b44b55907ac7a0cd3786517705d38
+- 追加ケース: 他編集者の更新後の保存拒否と入力保持／古い画面からのアーカイブ拒否／保存成功後の連続編集。
+- DB試験は単一トランザクション内の古い更新条件の検証であり、実管理者2アカウント・並列DBセッションによる競合試験ではない。
+- この保護は新管理画面の更新経路が対象。DBのupdated_at自動更新トリガーは存在せず、更新日時を変更しない外部更新は検知対象外。
+- 実認証・実画像E2E、実機、最終検収は未完了。本番未公開・Draft維持。
+
+## 2026-10-26 VL-0002 再開時の確認（開発v2.25.5）
+- 再開工程: NEWS-001 第06工程。対象ブランチは `feature/news-001-foundation`、Draft PR #7。
+- [x] 前回保留だったRun 39947405798は全3ジョブ成功。ChromiumモックE2Eは19/19合格。新規の実認証試験ではなく、既存CIの結果確定。
+- [x] 現在のDBでNEWS関連5テーブルすべてのRLS有効を確認。
+- [x] 記事の一般公開条件は `status='published' AND published_at <= now() AND deleted_at IS NULL`。
+- [x] 管理者ポリシーは `app_metadata.role` のadmin/super_adminを参照。匿名の記事・画像メタデータINSERT権限はなし。
+- [x] 改訂履歴・監査ログはauthenticatedの直接INSERT/TRUNCATE権限なし。
+- [x] `news-images`は非公開、JPEG/PNG/WebP、最大5,242,880バイトの設定を確認。
+- [x] 今回の実HTTP確認5項目: 不正記事ID/存在しない画像ID/存在しない記事IDは各404（no-store・nosniff・CORSも確認）、匿名記事SELECTは200・0件、画像メタデータの匿名直接SELECTは401。空データのため実画像200の証拠とはしない。
+- Security AdvisorのNEWSテーブルに関する指摘はなし。プロジェクト全体には漏えいパスワード保護無効のWARNと、recruit_submission_limitsのポリシーなしINFOが残る。今回設定は変更していない。参照: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection / https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+- [x] 予約投稿の実装を再確認。未来のpublished_atとstatus=publishedを保存し、RLSの時刻条件で公開する方式。cronによるstatus変更を前提としない。自然な時刻到達の実試験は未完了。
+- 公開mainはv2.24.23（fc469b39e337904884c7b38d575dd36f76d84036）。NEWS実装は未統合。開発版の合格を公開サイトの合格と扱わない。
+- 次の必須検収は実管理者/一般ユーザーの認証・実画像のライフサイクル・実機。検証用ログインは確立しておらず、パスワードの作成/変更や権限昇格で代用しない。
+- DB/Storage設定・既存記事の変更は行っていない。全ページの版統一、mainとの差分調整、最終レビューも未完了。Draft維持・第06工程は継続中。

@@ -52,4 +52,3 @@ revoke all on function public.submit_service_request(text, jsonb) from public, a
 grant execute on function public.submit_service_request(text, jsonb) to service_role;
 grant select, insert, update on public.service_request_submission_limits to service_role;
 grant insert on public.service_requests to service_role;
-

@@ -1,14 +1,18 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.30",
-  "updated": "2026-11-12T04:25:47.921Z",
+  "version": "v2.25.9",
+  "updated": "2026-11-12T11:04:57Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "style: use borderless NEWS articles with single dividers between entries",
+    "integration: retain the production Turnstile-protected request intake alongside NEWS-001",
     "security: route production requests through Turnstile-protected intake (SEC-04)",
+    "test: align live NEWS acceptance with pinned SDK and canonical role RPC",
+    "integration: retain v2.24.29 protections and align NEWS role checks with canonical RPC",
     "fix: preserve leading newlines and plain-text rendering in administrator request memos",
     "security: restrict images and authorize inline styles by hash; protect custom 404 responses",
     "security: exclude development files from legacy Jekyll Pages builds",
@@ -23,11 +27,7 @@
     "fix: reconcile official site version metadata with recruitment page",
     "fix: show safe API validation errors for iPad recruitment submissions (#5)",
     "Create zap-scan.yml",
-    "fix: recover submit controls on request/recruit network exceptions",
-    "fix: synchronize official site page version metadata and CSS/JS cache keys",
-    "fix: align SERVICE card top edges and equalize heights",
-    "fix: add explicit GitHub Pages deploy workflow and prevent version double bump",
-    "fix: unify ABOUT nav and improve contrast (v2.24.4)"
+    "fix: recover submit controls on request/recruit network exceptions"
   ],
-  "commit": "20d8186b6f5c32dc7082b64030d61c5a9eec6e89"
+  "commit": "41c897465e1e806080c3c550a3e369bcddad7a9f"
 }
