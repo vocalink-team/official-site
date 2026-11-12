@@ -1,14 +1,15 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.24.30",
-  "updated": "2026-11-11T11:34:35.512Z",
+  "version": "v2.24.31",
+  "updated": "2026-11-12T04:40:16.607Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
-    "security: harden invitation, audit event, Discord notification and service request APIs (SEC-01–SEC-04)",
+    "security: harden invitation, audit event and Discord notification authorization (SEC-01–SEC-03)",
+    "security: route production requests through Turnstile-protected intake (SEC-04)",
     "fix: preserve leading newlines and plain-text rendering in administrator request memos",
     "security: restrict images and authorize inline styles by hash; protect custom 404 responses",
     "security: exclude development files from legacy Jekyll Pages builds",
@@ -26,8 +27,7 @@
     "fix: recover submit controls on request/recruit network exceptions",
     "fix: synchronize official site page version metadata and CSS/JS cache keys",
     "fix: align SERVICE card top edges and equalize heights",
-    "fix: add explicit GitHub Pages deploy workflow and prevent version double bump",
-    "fix: unify ABOUT nav and improve contrast (v2.24.4)"
+    "fix: add explicit GitHub Pages deploy workflow and prevent version double bump"
   ],
-  "commit": "1467979b987bc7339dfdae283a55886372f04645"
+  "commit": "20d8186b6f5c32dc7082b64030d61c5a9eec6e89"
 }
