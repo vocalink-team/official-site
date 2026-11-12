@@ -1,0 +1,31 @@
+{
+  "ref": "sec05_official_site_response_headers",
+  "description": "SEC-05 response security headers for the official custom hostname",
+  "expression": "(http.host eq \"www.vocalink-team.com\" and ssl)",
+  "action": "rewrite",
+  "action_parameters": {
+    "headers": {
+      "content-security-policy": {
+        "operation": "add",
+        "value": "frame-ancestors 'none'"
+      },
+      "x-frame-options": {
+        "operation": "set",
+        "value": "DENY"
+      },
+      "x-content-type-options": {
+        "operation": "set",
+        "value": "nosniff"
+      },
+      "referrer-policy": {
+        "operation": "set",
+        "value": "strict-origin-when-cross-origin"
+      },
+      "strict-transport-security": {
+        "operation": "set",
+        "value": "max-age=300"
+      }
+    }
+  },
+  "enabled": false
+}

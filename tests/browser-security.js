@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const crypto = require('node:crypto');
 const dep = require('../security/dependencies.json').supabase;
+const headerRule = require('../security/sec05-response-header-rule.json');
 const memoCases = ['', '\n先頭改行', '\n\n複数改行\n末尾\n', '</textarea><script>window.__memoInjected=true</script>', '<b>日本語 & text</b>'];
 (async () => {
   const response = await fetch(dep.url);
@@ -129,6 +130,48 @@ const memoCases = ['', '\n先頭改行', '\n\n複数改行\n末尾\n', '</textar
     assert.equal(await page.title(), 'ページが見つかりません | VOCALINK-TEAM');
     assert.equal(await page.locator('meta[http-equiv="Content-Security-Policy"]').count(), 1);
     await page.close();
+
+    const expectedHeaders = Object.fromEntries(Object.entries(headerRule.action_parameters.headers)
+      .map(([name, setting]) => [name, setting.value]));
+    for (const [pathname, status] of [['/', 200], ['/admin.html', 200], ['/request.html', 200], ['/sec05-not-found', 404]]) {
+      const response = await fetch('http://127.0.0.1:3000' + pathname);
+      assert.equal(response.status, status, pathname);
+      for (const [name, value] of Object.entries(expectedHeaders)) {
+        assert.equal(response.headers.get(name), value, pathname + ': ' + name);
+      }
+      await response.body.cancel();
+      console.log('PASS SEC-05 HTTP headers', status, pathname);
+    }
+
+    const embed = await browser.newPage();
+    try {
+      const parent = 'http://localhost:3000/sec05-embedding-probe';
+      const control = 'http://127.0.0.1:3000/sec05-unprotected-control';
+      const admin = 'http://127.0.0.1:3000/admin.html';
+      await embed.route(control, route => route.fulfill({
+        contentType: 'text/html', body: '<p id="sec05-control">Cross-origin control</p>'
+      }));
+      await embed.route(parent, route => route.fulfill({
+        contentType: 'text/html',
+        body: '<iframe id="control" src="' + control + '"></iframe><iframe id="protected" src="' + admin + '"></iframe>'
+      }));
+      const failures = [];
+      embed.on('requestfailed', request => {
+        if (request.url() === admin) failures.push(request.failure()?.errorText);
+      });
+      await embed.goto(parent, { waitUntil: 'load' });
+      await embed.frameLocator('#control').locator('#sec05-control').waitFor({ timeout: 10000 });
+      const protectedFrame = await (await embed.locator('#protected').elementHandle()).contentFrame();
+      assert.ok(protectedFrame, 'Protected iframe exists');
+      const protectedUrl = protectedFrame.url();
+      assert.notEqual(protectedUrl, admin, 'Admin document must not load in the iframe');
+      assert.ok(protectedUrl.startsWith('chrome-error:') ||
+        failures.some(error => error?.includes('ERR_BLOCKED_BY_RESPONSE')),
+      'Chromium must report a blocked response, got ' + JSON.stringify({ protectedUrl, failures }));
+      console.log('PASS SEC-05 cross-origin admin iframe blocked');
+    } finally {
+      await embed.close();
+    }
     assert.deepEqual(failures, [], 'All browser cases must pass');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

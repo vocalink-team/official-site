@@ -1,0 +1,37 @@
+name: SEC-01 regression checks
+on:
+  pull_request:
+    paths:
+      - 'request.html'
+      - 'supabase/functions/submit-service-request/**'
+      - 'supabase/sql/sec04_*.sql'
+      - 'tests/sec-04-service-request.cjs'
+      - 'supabase/functions/_shared/security-admin.ts'
+      - 'supabase/functions/security-alert-discord*/**'
+      - 'tests/sec-03-discord-alert.cjs'
+      - 'supabase/functions/admin-security-test-v4/**'
+      - 'tests/sec-02-admin-security-test.cjs'
+      - 'supabase/functions/team-member-invite/**'
+      - 'tests/sec-01-super-admin.cjs'
+      - 'tests/sec-01-request-mock.cjs'
+      - '.github/workflows/sec-01-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run SEC-01 isolated regression tests
+        run: node --test tests/sec-01-super-admin.cjs
+      - name: Run request-handler tests with mocked Supabase
+        run: node --test tests/sec-01-request-mock.cjs
+      - name: Run official-site Node test suite
+        run: npm test

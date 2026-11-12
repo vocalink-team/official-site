@@ -1,0 +1,52 @@
+name: SEC-01 isolated unauthenticated API smoke test
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/sec-01-isolated-smoke.yml'
+      - 'supabase/functions/team-member-invite/index.ts'
+      - 'supabase/functions/admin-security-test-v4/index.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unauthenticated-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reject unauthenticated requests on TEST project only
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://ktzcjyyesyewbzvrwngx.supabase.co/functions/v1/team-member-invite"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+          status="$(curl --silent --show-error --max-time 20 --output "$response_file" --write-out '%{http_code}' --request POST --header 'Content-Type: application/json' --data '{"email":"nobody@example.invalid","display_name":"No auth","role_key":"viewer"}' "$url")"
+          echo "Unauthenticated request HTTP status: $status"
+          if [ "$status" != "401" ] && [ "$status" != "403" ]; then
+            echo "::error::Expected unauthenticated request to be rejected (401/403); got $status"
+            exit 1
+          fi
+          echo "Unauthenticated request rejected; no authenticated mutation was attempted."
+      - name: Verify SEC-02 gateway rejects missing and invalid JWTs
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="https://ktzcjyyesyewbzvrwngx.supabase.co/functions/v1/admin-security-test-v4"
+          response_file="$(mktemp)"
+          trap 'rm -f "$response_file"' EXIT
+
+          check_denial() {
+            local label="$1"
+            shift
+            local status
+            status="$(curl --silent --show-error --max-time 20 \
+              --output "$response_file" --write-out '%{http_code}' \
+              --request POST "$@" "$url")"
+            echo "SEC-02 $label: HTTP $status"
+            test "$status" = 401
+          }
+
+          check_denial "missing JWT"
+          check_denial "invalid JWT" --header 'Authorization: Bearer invalid-sec02-token'
