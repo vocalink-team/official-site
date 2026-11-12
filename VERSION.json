@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.25.8",
-  "updated": "2026-11-12T10:42:03Z",
+  "version": "v2.25.9",
+  "updated": "2026-11-12T11:04:57Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "style: use borderless NEWS articles with single dividers between entries",
     "integration: retain the production Turnstile-protected request intake alongside NEWS-001",
     "security: route production requests through Turnstile-protected intake (SEC-04)",
     "test: align live NEWS acceptance with pinned SDK and canonical role RPC",
@@ -26,8 +27,7 @@
     "fix: reconcile official site version metadata with recruitment page",
     "fix: show safe API validation errors for iPad recruitment submissions (#5)",
     "Create zap-scan.yml",
-    "fix: recover submit controls on request/recruit network exceptions",
-    "fix: synchronize official site page version metadata and CSS/JS cache keys"
+    "fix: recover submit controls on request/recruit network exceptions"
   ],
-  "commit": "b4bd0ea5bdc6e7cec48675a4457bfc72b386bb11"
+  "commit": "41c897465e1e806080c3c550a3e369bcddad7a9f"
 }
