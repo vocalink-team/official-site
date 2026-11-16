@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.25.10",
-  "updated": "2026-11-16T10:53:36Z",
+  "version": "v2.25.11",
+  "updated": "2026-11-16T11:20:22Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "style: share official-site navigation and typography with public NEWS",
     "style: simplify the public NEWS list and detail pages",
     "style: use borderless NEWS articles with single dividers between entries",
     "integration: retain the production Turnstile-protected request intake alongside NEWS-001",
@@ -26,8 +27,7 @@
     "fix: synchronize site versions and display update timestamps in JST",
     "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
     "fix: reconcile official site version metadata with recruitment page",
-    "fix: show safe API validation errors for iPad recruitment submissions (#5)",
-    "Create zap-scan.yml"
+    "fix: show safe API validation errors for iPad recruitment submissions (#5)"
   ],
-  "commit": "a4a75a354619718fa58aea2bf91584a6c4eeb4ec"
+  "commit": "5adef6f549175aac4939f29550ed6e661fed2d66"
 }
