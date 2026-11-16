@@ -91,7 +91,7 @@ test.beforeEach(async ({page}) => {
 });
 test('NEWS一覧に公開記事を表示し検索・カテゴリUIが動く', async ({page}) => {
  await page.goto('/news.html');
- await expect(page.getByRole('heading',{name:'NEWS.'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'お知らせ',exact:true})).toBeVisible();
  await expect(page.getByRole('link',{name:'公開済みのお知らせ'})).toBeVisible();
  await expect(page.getByText('重要',{exact:true})).toBeVisible();
  await page.getByLabel('キーワード').fill('一致しない文字列');

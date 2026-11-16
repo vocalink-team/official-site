@@ -1,5 +1,5 @@
 // NEWS-001 public renderer. The database RLS is the authoritative publication boundary.
-import {createClient} from './news-client.js?v=2.25.7';
+import {createClient} from './news-client.js?v=2.25.10';
 export const sb=createClient('https://qvxoxrzvxyyribqjnpkb.supabase.co','sb_publishable_1zOA0YpTtJkNYsmm4zXxsA_wSJpdHKe',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 export const formatJst=value=>new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
 const allowed=new Set(['P','DIV','BR','STRONG','B','EM','I','U','UL','OL','LI','H2','H3','BLOCKQUOTE','A']);
@@ -24,13 +24,22 @@ export function safeArticleHtml(html){
  appendSafe(doc.body.firstElementChild,output);
  return output;
 }
-export function articleCard(article,categories){
- const item=document.createElement('article');item.className='news-card';
+const newsDate = new Intl.DateTimeFormat('ja-JP', {
+ timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+export const formatNewsDate = value => newsDate.format(new Date(value)).replaceAll('/', '.');
+
+export function articleRow(article,categories){
+ const item=document.createElement('article');item.className='news-row';
+ const date=document.createElement('time');date.dateTime=article.published_at;date.textContent=formatNewsDate(article.published_at);
+ const content=document.createElement('div');
+ const title=document.createElement('h2');
+ const link=document.createElement('a');link.href='news-detail.html?slug='+encodeURIComponent(article.slug);link.textContent=article.title;
+ title.append(link);
  const meta=document.createElement('div');meta.className='news-meta';
- const date=document.createElement('time');date.dateTime=article.published_at;date.textContent=formatJst(article.published_at);meta.append(date);
- if(article.is_pinned){const badge=document.createElement('strong');badge.className='pin';badge.textContent='重要';meta.append(badge)}
- const cat=categories.get(article.category_id);if(cat){const span=document.createElement('span');span.textContent=cat;meta.append(span)}
- const title=document.createElement('h2');const a=document.createElement('a');a.href='news-detail.html?slug='+encodeURIComponent(article.slug);a.textContent=article.title;title.append(a);
- const excerpt=document.createElement('p');excerpt.textContent=article.excerpt||'';
- item.append(meta,title,excerpt);return item;
+ if(article.is_pinned){const label=document.createElement('strong');label.className='pin';label.textContent='重要';meta.append(label)}
+ const category=categories.get(article.category_id);
+ if(category){const label=document.createElement('span');label.textContent=category;meta.append(label)}
+ const arrow=document.createElement('span');arrow.className='news-arrow';arrow.setAttribute('aria-hidden','true');
+ content.append(title,meta);item.append(date,content,arrow);return item;
 }
