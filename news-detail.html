@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com 'sha256-sZiySSb0jetWgPHEE6NFTui+Qt8NgwN3OLvpIczxmsc='; script-src-attr 'none'; style-src 'self' ; style-src-attr 'none'; img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co; font-src 'self' data:; connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="version" content="2.25.10"><meta name="description" content="VOCALINK-TEAMのお知らせ記事"><title>お知らせ | VOCALINK-TEAM</title>
+<link rel="stylesheet" href="news-layout.css?v=2.25.10"><meta name="referrer" content="strict-origin-when-cross-origin"></head><body><header><div class="wrap top"><a class="brand" href="index.html">VOCALINK<span>-TEAM</span></a><nav aria-label="主要ナビゲーション"><a href="index.html">トップ</a><a href="news.html">お知らせ</a></nav></div></header>
+<main class="wrap detail"><a class="back" href="news.html">← お知らせ一覧</a><p id="status" role="status" aria-live="polite" class="muted">記事を読み込んでいます…</p>
+<article id="article" hidden><div id="meta" class="meta"></div><h1 id="title"></h1><p id="excerpt" class="muted"></p><div id="body" class="article-body"></div><div id="gallery" class="news-gallery" aria-label="記事の添付画像"></div></article>
+</main><footer><div class="wrap">© 2026 VOCALINK-TEAM</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script><script type="module">
+import {sb,formatNewsDate,safeArticleHtml} from './news-public.js?v=2.25.10';
+const $=id=>document.getElementById(id),slug=new URLSearchParams(location.search).get('slug')||'';
+async function load(){
+ if(!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)||slug.length>120){$('status').textContent='記事が見つかりません。';return}
+ const {data,error}=await sb.from('news_articles').select('id,title,slug,excerpt,body_json,category_id,published_at,is_pinned')
+ .eq('slug',slug).eq('status','published').is('deleted_at',null).lte('published_at',new Date().toISOString()).maybeSingle();
+ if(error){$('status').textContent='記事を読み込めませんでした。時間をおいて再度お試しください。';return}
+ if(!data){$('status').textContent='記事が見つかりません。';return}
+ document.title=data.title+' | VOCALINK-TEAM';$('title').textContent=data.title;$('excerpt').textContent=data.excerpt||'';
+ const time=document.createElement('time');time.dateTime=data.published_at;time.textContent=formatNewsDate(data.published_at);$('meta').append(time);
+ if(data.is_pinned){const tag=document.createElement('strong');tag.className='pin';tag.textContent='重要';$('meta').append(tag)}
+ if(data.category_id){const {data:category}=await sb.from('news_categories').select('name').eq('id',data.category_id).eq('is_active',true).maybeSingle();if(category){const span=document.createElement('span');span.textContent=category.name;$('meta').append(span)}}
+ const content=data.body_json?.format==='safe-html-v1'?data.body_json.html:'';$('body').append(safeArticleHtml(content));
+ $('status').hidden=true;$('article').hidden=false;
+ // The gateway re-checks publication for both the list and every individual image request.
+ const endpoint='https://qvxoxrzvxyyribqjnpkb.supabase.co/functions/v1/news-public-media';
+ try{
+  const response=await fetch(endpoint+'?article='+encodeURIComponent(data.id),{cache:'no-store'});
+  if(response.ok){const images=await response.json();
+   for(const image of Array.isArray(images)?images.slice(0,24):[]){
+    if(!/^[0-9a-f-]{36}$/i.test(image.id))continue;
+    const img=document.createElement('img');img.loading='lazy';img.alt='記事の添付画像';img.referrerPolicy='no-referrer';
+    img.src=endpoint+'?id='+encodeURIComponent(image.id);$('gallery').append(img);
+   }
+  }
+ }catch{ /* The article remains readable when media delivery is unavailable. */ }
+}
+await load();
+</script></body></html>
