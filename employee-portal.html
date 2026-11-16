@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js https://challenges.cloudflare.com ; script-src-attr 'none'; style-src 'self' 'sha256-EPjc+yM9asNFtxKhT4WXAw4yX7EUGwqrrSLr/16trzY='; style-src-attr 'none'; img-src 'self' data: blob: https://qvxoxrzvxyyribqjnpkb.supabase.co; font-src 'self' data:; connect-src 'self' https://qvxoxrzvxyyribqjnpkb.supabase.co wss://qvxoxrzvxyyribqjnpkb.supabase.co https://raw.githubusercontent.com https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; worker-src 'self' blob:">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="version" content="2.25.13">
+<meta name="robots" content="noindex, nofollow">
+<title>従業員ポータル | VOCALINK-TEAM</title>
+<link rel="stylesheet" href="vl-ui.css?v=2.25.13">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh}.wrap{width:min(100% - 36px,860px);margin-inline:auto}header nav,.session{display:flex;align-items:center;justify-content:space-between;gap:12px}main{padding-block:12px 64px}h1{font-size:clamp(26px,5vw,40px);margin-block:0 18px}h2{font-size:22px;margin-block:0 14px}
+section+section{margin-top:32px;padding-top:26px;border-top:1px solid #b99a89}section p{margin-block:4px 14px}.account{font-size:14px;overflow-wrap:anywhere}label{display:block;font-size:14px;font-weight:650;margin-bottom:4px}
+form{display:grid;gap:14px;max-width:680px}.login-form{max-width:390px}.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{min-width:0}
+input,select,textarea,button{font:inherit;min-height:44px;padding:8px 12px;border:1px solid #b99a89}input,select,textarea{width:100%;min-width:0}textarea{resize:vertical;min-height:90px}button{cursor:pointer;border-radius:12px;background:#fffaf6;color:#251713}button[disabled]{cursor:default;opacity:.6}form button{justify-self:start;padding-inline:22px}
+#portal-status,#submit-status,#history-status{min-height:1.5em;font-size:14px;margin-block:10px}nav a,.manual-links a{color:inherit;text-underline-offset:4px}.manual-links{padding-left:22px;margin-block:8px 0}.manual-links a{display:inline-flex;align-items:center;min-height:44px}
+#history-list{list-style:none;padding:0;margin:0}#history-list li{padding-block:13px;border-bottom:1px solid #b99a89;overflow-wrap:anywhere}#history-list li:last-child{border-bottom:none}[hidden]{display:none!important}
+@media(max-width:560px){.fields{grid-template-columns:1fr}.session{align-items:flex-start}header nav{min-height:0}}
+</style><meta name="referrer" content="strict-origin-when-cross-origin"></head>
+<body class="vl-ui">
+<header><div class="wrap"><nav aria-label="従業員ポータル"><a class="logo" href="index.html">vocalink<span>-team</span></a></nav></div></header>
+<main class="wrap">
+<h1>従業員ポータル</h1>
+<p id="portal-status" role="status">ログイン状態を確認しています。</p>
+<section id="login" hidden>
+<h2>ログイン</h2>
+<form id="login-form" class="login-form">
+<div><label for="email">メールアドレス</label><input type="email" id="email" name="email" autocomplete="username" required></div>
+<div><label for="password">パスワード</label><input type="password" id="password" name="password" autocomplete="current-password" required></div>
+<button type="submit">ログイン</button>
+</form>
+</section>
+<button id="retry" type="button" hidden>接続を再確認</button>
+<div id="workspace" hidden>
+<div class="session"><span id="account" class="account"></span><button type="button" id="logout">ログアウト</button></div>
+<section aria-labelledby="manual-heading">
+<h2 id="manual-heading">マニュアル</h2>
+<ul class="manual-links">
+<li><a href="manuals.html#overview">運営マニュアル一覧</a></li>
+<li><a href="manuals.html#expense-application">経費申請の手順</a></li>
+</ul>
+</section>
+<section aria-labelledby="expense-heading">
+<h2 id="expense-heading">経費申請</h2>
+<p>業務で立て替えた支出を申請します。領収書は指定の保存先に保管してください。</p>
+<form id="expense-form">
+<div class="fields">
+<div class="field"><label for="spent-on">支払日</label><input type="date" id="spent-on" name="spent_on" required></div>
+<div class="field"><label for="category">費目</label><select id="category" name="category" required>
+<option value="">選択してください</option><option value="transport">交通費</option><option value="software">ソフトウェア・サーバー</option><option value="production">制作・外注費</option><option value="equipment">備品</option><option value="other">その他</option>
+</select></div>
+<div class="field"><label for="amount">支払額（円）</label><input type="number" id="amount" name="amount_yen" min="1" max="999999999" step="1" inputmode="numeric" required></div>
+<div class="field"><label for="payee">支払先</label><input id="payee" name="payee" maxlength="120" required></div>
+</div>
+<div><label for="purpose">用途</label><textarea id="purpose" name="purpose" maxlength="500" required></textarea></div>
+<div><label for="receipt">証憑のファイル名・管理番号（任意）</label><input id="receipt" name="evidence_reference" maxlength="300"></div>
+<button type="submit">申請する</button>
+</form>
+<p id="submit-status" role="status"></p>
+</section>
+<section aria-labelledby="history-heading">
+<h2 id="history-heading">自分の申請履歴</h2>
+<p id="history-status" role="status"></p>
+<ol id="history-list"></ol>
+</section>
+</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js" integrity="sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK" crossorigin="anonymous"></script>
+<script type="module" src="employee-portal.js?v=2.25.13"></script>
+</body></html>

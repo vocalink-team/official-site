@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.25.12",
-  "updated": "2026-11-16T11:36:17Z",
+  "version": "v2.25.13",
+  "updated": "2026-11-16T12:01:58Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "feat: add the employee expense form and application guide",
     "fix: restore NEWS logo and search contrast and align search controls",
     "style: share official-site navigation and typography with public NEWS",
     "style: simplify the public NEWS list and detail pages",
@@ -26,8 +27,7 @@
     "Remove electronic signature pages and navigation",
     "Create CNAME",
     "fix: synchronize site versions and display update timestamps in JST",
-    "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
-    "fix: reconcile official site version metadata with recruitment page"
+    "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)"
   ],
-  "commit": "5e7cf57cde7da154cb29e42087cefb085570f385"
+  "commit": "10a45b7e75861adc13babc78400f46f872bc5a73"
 }
