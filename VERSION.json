@@ -1,13 +1,14 @@
 {
   "product": "Vocalink-team Official Site",
-  "version": "v2.25.11",
-  "updated": "2026-11-16T11:20:22Z",
+  "version": "v2.25.12",
+  "updated": "2026-11-16T11:36:17Z",
   "versioning": {
     "major": "大規模変更",
     "minor": "機能追加",
     "patch": "軽微な修正"
   },
   "changes": [
+    "fix: restore NEWS logo and search contrast and align search controls",
     "style: share official-site navigation and typography with public NEWS",
     "style: simplify the public NEWS list and detail pages",
     "style: use borderless NEWS articles with single dividers between entries",
@@ -26,8 +27,7 @@
     "Create CNAME",
     "fix: synchronize site versions and display update timestamps in JST",
     "fix: show version dashboard update times in Japan Standard Time (Asia/Tokyo)",
-    "fix: reconcile official site version metadata with recruitment page",
-    "fix: show safe API validation errors for iPad recruitment submissions (#5)"
+    "fix: reconcile official site version metadata with recruitment page"
   ],
-  "commit": "5adef6f549175aac4939f29550ed6e661fed2d66"
+  "commit": "5e7cf57cde7da154cb29e42087cefb085570f385"
 }
